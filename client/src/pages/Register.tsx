@@ -32,6 +32,7 @@ const otpSchema = emailSchema.extend({
 });
 const ProfileForm = () => {
   const [otpSent, setOtpSent] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const form = useForm<FormData>({
     resolver: zodResolver(otpSent ? otpSchema : emailSchema),
   });
@@ -57,17 +58,31 @@ const ProfileForm = () => {
     try {
       const response = await axios.post('http://localhost:8000/api/v1/register', data);
       console.log('User is Verified!:', response.data);
-      toast.success('Registration successful!');
-      navigate('/login');
+      toast.success('Registration successful! Now you can login!');
+      setShowLoginPrompt(true);
+      setTimeout(() => {
+        setShowLoginPrompt(false);
+        navigate('/');
+      }, 2000);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Registration failed:', error.response?.data || error.message);
-        toast.error('Registration failed!');
+      if (error.response?.status === 400) {
+        const errorMessage = error.response?.data;
+        toast.error(errorMessage);
+        // Set errors in the form for display
+        if (errorMessage.includes('first name')) {
+          form.setError('firstName', { message: errorMessage });
+        } else if (errorMessage.includes('last name')) {
+          form.setError('lastName', { message: errorMessage });
+        }
       } else {
-        console.error('Registration failed:', error);
         toast.error('Registration failed!');
       }
-    }
+    } else {
+      // console.error('Registration failed:', error);
+      toast.error('Registration failed!');
+    }}
   };
   // const handleVerifyOtp = async (data: OtpFormData) => {
   //   try {
@@ -99,14 +114,32 @@ const ProfileForm = () => {
     }
   };
 
+  // const renderValidationErrors = () => {
+  //   const { errors } = form.formState;
+  //   if (Object.keys(errors).length > 0) {
+  //     return (
+  //       <div className="text-red-500 mb-4">
+  //         {Object.values(errors).map((error, index) => (
+  //           <p key={index}>{error?.message}</p>
+  //         ))}
+  //       </div>
+  //     );
+  //   }
+  //   return null;
+  // };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 border p-5 rounded-md w-[400px]">
-        <FormField
+      
+      {/* {renderValidationErrors()}    */}
+         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
+            <>
                 <Input placeholder="Email" {...field} className='w-full'/>
+            </>
           )}
         />
         {/* {!otpSent && (
@@ -120,15 +153,18 @@ const ProfileForm = () => {
               control={form.control}
               name="firstName"
               render={({ field }) => (
+                <>
                     <Input placeholder="First Name" {...field} />
+                </>
               )}
             />
             <FormField
               control={form.control}
               name="lastName"
               render={({ field }) => (
-          
+          <>
                     <Input placeholder="Last Name" {...field} />
+                    </>
               )}
               />
         <FormField
@@ -148,10 +184,13 @@ const ProfileForm = () => {
           </>
         )}
         <div className="flex justify-center">
-        <Button type="submit">Register</Button>
+        <Button type="submit" className='w-full'>Register</Button>
 
         </div>
       </form>
+      <div className="">
+        <a href="/">Login?</a>
+      </div>
     </Form>
   );
 };

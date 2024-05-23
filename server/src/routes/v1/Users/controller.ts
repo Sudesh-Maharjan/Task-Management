@@ -3,6 +3,7 @@ import User from './model';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { sendOtpEmail } from './service';
+import { access } from 'fs';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
@@ -91,7 +92,13 @@ user.otpExpires = undefined;
 
 await user.save();
 res.status(201).send('Registration Success full!');
-   }catch(error){
+   }catch(error: any){
+      if (error.code === 11000 && error.keyPattern?.firstName === 1) {
+         return res.status(400).send('A user with this first name already exists');
+       }
+       if (error.keyPattern?.lastName === 1) {
+         return res.status(400).send('A user with this last name already exists');
+       }
       console.error('Error in register:', error)
       res.status(500).send('Server error');
    }
@@ -129,11 +136,18 @@ if(!user.isVerified) return res.status(400).send('User not verified');
 
 const isMatch = await bcrypt.compare(password, user.password);
 if(!isMatch) return res.status(400).send('Invalid credentials');
-const token = jwt.sign({id: user._id}, process.env.JWT_SECRET || 'secret',{
+const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret', {
    expiresIn: '1h'
 });
-// res.status(200).json('Logged In successfully!');
-res.status(200).json({token});
+
+const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET || 'refreshsecret', {
+   expiresIn: '7d'
+});
+//set token to cookies
+res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, maxAge: 3600000 }); // 1 hour expiration
+res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, maxAge: 604800000 }); // 7 days expiration
+res.status(200).json('Logged In successfully!');
+// res.status(200).json({accessToken, refreshToken});
 
    }catch(error){
 res.status(500).send('Server error');
