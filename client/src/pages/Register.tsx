@@ -1,0 +1,171 @@
+import React, { useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import axios from 'axios';
+import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
+import { ZodIssue } from 'zod';
+import { Toaster, toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import {
+  Form,
+  FormField,
+} from "@/components/ui/form";
+
+
+const emailSchema = z.object({
+  email: z.string().email({ message: 'Invalid email address.' }),
+});
+
+
+
+type EmailFormData = {email: string};
+type OtpFormData = {email: string; password: string; otp: string; firstName: string; lastName: string};
+type FormData = EmailFormData | OtpFormData;
+
+const otpSchema = emailSchema.extend({
+  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+  otp: z.string().length(6, { message: 'OTP must be 6 digits.' }),
+  firstName: z.string().min(1, { message: 'First Name is required.' }),
+  lastName: z.string().min(1, { message: 'Last Name is required.' })
+});
+const ProfileForm = () => {
+  const [otpSent, setOtpSent] = useState(false);
+  const form = useForm<FormData>({
+    resolver: zodResolver(otpSent ? otpSchema : emailSchema),
+  });
+  const navigate = useNavigate();
+
+  const handleSendOtp = async (data: EmailFormData) => {
+    try {
+      const response = await axios.post('http://localhost:8000/api/v1/send-otp', { email: data.email });
+      console.log('OTP sent:', response.data);
+      toast.success('OTP has been sent to your email!');
+      setOtpSent(true);
+    } catch (error) {
+      if(axios.isAxiosError(error)){
+      console.error('Error sending OTP:', error.response?.data || error.message);
+      toast.error('Failed to send OTP!');
+      }else{
+        console.log('Error sending OTP:', error);
+        toast.error('Failed to send OTP!');
+      }
+    }
+  };
+  const handleRegister = async (data: OtpFormData) => {
+    try {
+      const response = await axios.post('http://localhost:8000/api/v1/register', data);
+      console.log('User is Verified!:', response.data);
+      toast.success('Registration successful!');
+      navigate('/login');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Registration failed:', error.response?.data || error.message);
+        toast.error('Registration failed!');
+      } else {
+        console.error('Registration failed:', error);
+        toast.error('Registration failed!');
+      }
+    }
+  };
+  // const handleVerifyOtp = async (data: OtpFormData) => {
+  //   try {
+  //     const response = await axios.post('http://localhost:8000/api/v1/verify-otp', data);
+  //     console.log(response.data);
+  //   } catch (error) {
+  //     if (axios.isAxiosError(error)) {
+  //     console.error('Registration failed:', error.response?.data || error.message);
+  //     }else{
+  //       console.log('Registration failed:', error);
+  //     }
+  //   }
+  // };
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    try{
+    if (!otpSent) {
+        await form.trigger('email');
+        if (form.formState.errors.email) return;
+      handleSendOtp( data as EmailFormData);
+    }
+  else {
+      await form.trigger(['password', 'otp', 'firstName', 'lastName']);
+      const errors = form.formState.errors as Partial<Record<keyof OtpFormData, ZodIssue[]>>;
+      if (Object.keys(errors).length > 0) return; 
+      handleRegister(data as OtpFormData);
+    }
+    }catch(error){
+      console.log('Error:', (error as Error).message);
+    }
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 border p-5 rounded-md w-[400px]">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+                <Input placeholder="Email" {...field} className='w-full'/>
+          )}
+        />
+        {/* {!otpSent && (
+            <div className="flex justify-center">
+               <Button type="submit">Send OTP</Button>
+            </div>
+         )} */}
+        {otpSent && (
+          <>
+           <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                    <Input placeholder="First Name" {...field} />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+          
+                    <Input placeholder="Last Name" {...field} />
+              )}
+              />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+                <Input type="password" placeholder="Password" {...field} />
+          )}
+        />
+          <FormField
+              control={form.control}
+              name="otp"
+              render={({ field }) => (
+                    <Input placeholder="OTP" {...field} />
+              )}
+            />
+          </>
+        )}
+        <div className="flex justify-center">
+        <Button type="submit">Register</Button>
+
+        </div>
+      </form>
+    </Form>
+  );
+};
+
+const Register = () => {
+  return (
+    <div className='flex justify-center items-center flex-col w-full mt-40'>
+      <h1>Register</h1>
+      <div className="p-5">
+      <ProfileForm />
+      </div>
+      <Toaster />
+    </div>
+  );
+};
+
+export default Register;
