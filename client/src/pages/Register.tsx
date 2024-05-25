@@ -12,6 +12,7 @@ import {
   Form,
   FormField,
 } from "@/components/ui/form";
+import API_BASE_URL from "../../config";
 
 
 const emailSchema = z.object({
@@ -33,6 +34,7 @@ const otpSchema = emailSchema.extend({
 const ProfileForm = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  console.log(showLoginPrompt)
   const form = useForm<FormData>({
     resolver: zodResolver(otpSent ? otpSchema : emailSchema),
   });
@@ -40,7 +42,7 @@ const ProfileForm = () => {
 
   const handleSendOtp = async (data: EmailFormData) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/v1/users/send-otp', { email: data.email });
+      const response = await axios.post(`${API_BASE_URL}/users/send-otp`, { email: data.email });
       console.log('OTP sent:', response.data);
       toast.success('OTP has been sent to your email!');
       setOtpSent(true);
@@ -56,7 +58,7 @@ const ProfileForm = () => {
   };
   const handleRegister = async (data: OtpFormData) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/v1/users/register', data);
+      const response = await axios.post(`${API_BASE_URL}/users/register`, data);
       console.log('User is Verified!:', response.data);
       toast.success('Registration successful! Now you can login!');
       setShowLoginPrompt(true);
@@ -84,18 +86,7 @@ const ProfileForm = () => {
       toast.error('Registration failed!');
     }}
   };
-  // const handleVerifyOtp = async (data: OtpFormData) => {
-  //   try {
-  //     const response = await axios.post('http://localhost:8000/api/v1/verify-otp', data);
-  //     console.log(response.data);
-  //   } catch (error) {
-  //     if (axios.isAxiosError(error)) {
-  //     console.error('Registration failed:', error.response?.data || error.message);
-  //     }else{
-  //       console.log('Registration failed:', error);
-  //     }
-  //   }
-  // };
+
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try{
     if (!otpSent) {
@@ -113,20 +104,6 @@ const ProfileForm = () => {
       console.log('Error:', (error as Error).message);
     }
   };
-
-  // const renderValidationErrors = () => {
-  //   const { errors } = form.formState;
-  //   if (Object.keys(errors).length > 0) {
-  //     return (
-  //       <div className="text-red-500 mb-4">
-  //         {Object.values(errors).map((error, index) => (
-  //           <p key={index}>{error?.message}</p>
-  //         ))}
-  //       </div>
-  //     );
-  //   }
-  //   return null;
-  // };
 
   return (
     <Form {...form}>
