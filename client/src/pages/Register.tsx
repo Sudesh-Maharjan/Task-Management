@@ -40,7 +40,7 @@ const ProfileForm = () => {
 
   const handleSendOtp = async (data: EmailFormData) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/v1/send-otp', { email: data.email });
+      const response = await axios.post('http://localhost:8000/api/v1/users/send-otp', { email: data.email });
       console.log('OTP sent:', response.data);
       toast.success('OTP has been sent to your email!');
       setOtpSent(true);
@@ -56,7 +56,7 @@ const ProfileForm = () => {
   };
   const handleRegister = async (data: OtpFormData) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/v1/register', data);
+      const response = await axios.post('http://localhost:8000/api/v1/users/register', data);
       console.log('User is Verified!:', response.data);
       toast.success('Registration successful! Now you can login!');
       setShowLoginPrompt(true);
@@ -184,7 +184,7 @@ const ProfileForm = () => {
           </>
         )}
         <div className="flex justify-center">
-        <Button type="submit" className='w-full'>Register</Button>
+        <Button variant={'purple'} type="submit" className='w-full'>Register</Button>
 
         </div>
       </form>

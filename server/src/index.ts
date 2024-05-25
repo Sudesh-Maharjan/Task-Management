@@ -2,6 +2,7 @@ import express, {Request, Response} from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import userRoutes from './routes/v1/Users/index';
+import taskRoutes from './routes/v1/Tasks/index';
 import cors from 'cors';
 dotenv.config();
 
@@ -16,12 +17,8 @@ app.use(cors({
  
 app.use(express.json());
 
-app.get("/", (req: Request, res: Response) => {
-   res.send("Hello");
-});
-
-
-app.use('/api/v1', userRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/tasks', taskRoutes);
 
 
 mongoose.connect(`mongodb+srv://sudesh:admin123@taskmanagement.amqqiom.mongodb.net/taskmanagement?retryWrites=true&w=majority&appName=Taskmanagement`)

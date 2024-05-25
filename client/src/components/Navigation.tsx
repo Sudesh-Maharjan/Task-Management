@@ -2,23 +2,41 @@ import React from "react";
 import { Input } from "./ui/input";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/Auth/AuthContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Button } from "./ui/button";
+
+
 
 const Navigation = () => {
   //sidebar state manage
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-
+  // const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] = useState(false);
+const navigate = useNavigate();
   //toggle sidebar
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+  // const openLogoutConfirmation = () => {
+  //   setIsLogoutConfirmationOpen(true);
+  // };
 
-  //handle logout
+  // const closeLogoutConfirmation = () => {
+  //   setIsLogoutConfirmationOpen(false);
+  // };
+
+  // handle logout
   const handleLogout = () => {
-    logout();
-    navigate("/");
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    navigate('/');
   };
   return (
     <>
@@ -162,19 +180,35 @@ const Navigation = () => {
                   Services
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <button
                   onClick={handleLogout}
                   className="block py-2 px-3 rounded hover:bg-gray-100 md:hover:bg-transparent text-white md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
                 >
                   Logout
                 </button>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>
       </nav>
 
+      <AlertDialog>
+        <AlertDialogTrigger>
+          <Button variant={"purple"}>Logout</Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogAction onClick={handleLogout}>
+            Continue
+          </AlertDialogAction>
+          <AlertDialogCancel>
+            Cancel
+          </AlertDialogCancel>
+        </AlertDialogContent>
+      </AlertDialog>
       {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 w-64 bg-gray-200 dark:bg-gray-800 transition-transform duration-300 ease-in-out transform ${

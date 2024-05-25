@@ -12,7 +12,7 @@ import {
   Form,
   FormField,
 } from "@/components/ui/form";
-import { useAuth } from '@/Auth/AuthContext';
+
 const loginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
@@ -22,17 +22,21 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [showLoginSuccess, setShowLoginSuccess] = useState(false);
+  console.log(showLoginSuccess);
   const form = useForm<LoginFormData>({
    
     resolver: zodResolver(loginSchema),
   });
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleLogin: SubmitHandler<LoginFormData> = async (data) => {
     try {
-      const response = await axiosInstance.post('/login', data);
-      const { token } = response.data;
+      const response = await axiosInstance.post('users/login', data);
+      const { accessToken, refreshToken } = response.data;
+  // document.cookie = `accessToken=${accessToken};`;
+  localStorage.setItem('accessToken', accessToken);
+  localStorage.setItem('refreshToken', refreshToken);
+
       console.log('Login successful:', response.data);
       toast.success('Login successful!');
       setShowLoginSuccess(true);
@@ -40,11 +44,7 @@ const Login = () => {
         setShowLoginSuccess(false);
         navigate('/home');
       }, 2000);
-  // Save token in cookies
-  document.cookie = `accessToken=${token}; path=/;`;
 
-      login(token);
-      navigate('/home');
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data || 'Login failed! Please check your credentials.');
@@ -57,7 +57,6 @@ const Login = () => {
 
   return (
     <div className='flex justify-center items-center flex-col w-full mt-40'>
-      <h1>Login</h1>
       <div className="p-5">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-6 border p-5 rounded-md w-[400px]">
@@ -76,7 +75,7 @@ const Login = () => {
               )}
             />
             <div className="flex justify-center">
-              <Button type="submit" className='w-full'>Login</Button>
+              <Button variant={'purple'} type ="submit" className='w-full'>Login</Button>
             </div>
           </form>
         </Form>

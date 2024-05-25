@@ -146,8 +146,7 @@ const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET |
 //set token to cookies
 res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, maxAge: 3600000 }); // 1 hour expiration
 res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, maxAge: 604800000 }); // 7 days expiration
-res.status(200).json('Logged In successfully!');
-// res.status(200).json({accessToken, refreshToken});
+res.status(200).json({accessToken, refreshToken});
 
    }catch(error){
 res.status(500).send('Server error');
