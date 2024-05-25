@@ -61,6 +61,7 @@ const ProfileForm = () => {
       const response = await axios.post(`${API_BASE_URL}/users/register`, data);
       console.log('User is Verified!:', response.data);
       toast.success('Registration successful! Now you can login!');
+      
       setShowLoginPrompt(true);
       setTimeout(() => {
         setShowLoginPrompt(false);
@@ -106,8 +107,9 @@ const ProfileForm = () => {
   };
 
   return (
+    
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 border p-5 rounded-md w-[400px]">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 border p-5 rounded-md w-[400px] bg-white bg-opacity-80 shadow-md ">
       
       {/* {renderValidationErrors()}    */}
          <FormField
@@ -164,19 +166,21 @@ const ProfileForm = () => {
         <Button variant={'purple'} type="submit" className='w-full'>Register</Button>
 
         </div>
-      </form>
-      <div className="">
+      <div className="flex justify-center text-purple-600">
         <a href="/">Login?</a>
       </div>
+      </form>
     </Form>
   );
 };
 
 const Register = () => {
   return (
-    <div className='flex justify-center items-center flex-col w-full mt-40'>
+    <div className='flex justify-center items-center flex-col w-full relative min-h-screen bg-purple-300'>
+    
       <h1>Register</h1>
       <div className="p-5">
+        
       <ProfileForm />
       </div>
       <Toaster />

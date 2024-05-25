@@ -56,10 +56,49 @@ const Login = () => {
 
 
   return (
-    <div className='flex justify-center items-center flex-col w-full mt-40'>
-      <div className="p-5">
+    <div className="relative flex justify-center items-center min-h-screen bg-purple-300">
+      {/* Animated Cubes */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="cube">
+          <div className="cube__face cube__face--front"></div>
+          <div className="cube__face cube__face--back"></div>
+          <div className="cube__face cube__face--right"></div>
+          <div className="cube__face cube__face--left"></div>
+          <div className="cube__face cube__face--top"></div>
+          <div className="cube__face cube__face--bottom"></div>
+        </div>
+        <div className="cube">
+          <div className="cube__face cube__face--front"></div>
+          <div className="cube__face cube__face--back"></div>
+          <div className="cube__face cube__face--right"></div>
+          <div className="cube__face cube__face--left"></div>
+          <div className="cube__face cube__face--top"></div>
+          <div className="cube__face cube__face--bottom"></div>
+        </div>
+        <div className="cube">
+          <div className="cube__face cube__face--front"></div>
+          <div className="cube__face cube__face--back"></div>
+          <div className="cube__face cube__face--right"></div>
+          <div className="cube__face cube__face--left"></div>
+          <div className="cube__face cube__face--top"></div>
+          <div className="cube__face cube__face--bottom"></div>
+        </div>
+      </div>
+
+      {/* Animated Bouncing Balls */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="ball"></div>
+        <div className="ball"></div>
+        <div className="ball"></div>
+        <div className="ball"></div>
+        <div className="ball"></div>
+      </div>
+
+
+    
+      <div className="p-5 bg-white bg-opacity-80 rounded-md shadow-lg relative z-10">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-6 border p-5 rounded-md w-[400px]">
+          <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-6 w-[400px]">
             <FormField
               control={form.control}
               name="email"
@@ -79,9 +118,11 @@ const Login = () => {
             </div>
           </form>
         </Form>
-      <a href="/register">Register?</a>
-      </div>
+        <div className="text-center mt-4">
+          <a href="/register" className="text-purple-600 hover:underline">Register?</a>
+        </div>
       <Toaster />
+      </div>
     </div>
   );
 };

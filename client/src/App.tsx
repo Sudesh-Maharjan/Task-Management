@@ -26,8 +26,12 @@ const App = () => {
       }
     };
 
-    checkAuth();
-  }, [navigate]);
+    const exceptions = ['/register']; // Add more paths as needed
+
+    if (!exceptions.includes(location.pathname)) {
+      checkAuth();
+    }
+  }, [navigate, location]);
 
   return (
    <>

@@ -74,3 +74,129 @@
       @apply bg-background text-foreground;
     }
   }
+  @keyframes ballBounce {
+    0%, 100% {
+      transform: translateY(1000%);
+    }
+    50% {
+      transform: translateY(-100px);
+    }
+  }
+  
+  @keyframes ballMove {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(200px);
+    }
+  }
+  
+  @keyframes bubbleMove {
+    0% {
+      transform: translate(0, 0);
+    }
+    25% {
+      transform: translate(100px, -150px);
+    }
+    50% {
+      transform: translate(-200px, 200px);
+    }
+    75% {
+      transform: translate(150px, -100px);
+    }
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+  
+  .ball {
+    width: 200px; /* Ball size */
+    height: 200px; /* Ball size */
+    background-color: rgba(173, 127, 255, 0.7); /* Lighter purple color */
+    border-radius: 50%;
+    position: absolute;
+    top: 0%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.8;
+    animation: ballMove 20s infinite ease-in-out, ballBounce 20s infinite linear;
+  }
+  
+  .ball:nth-child(2) {
+    animation-duration: 12s, 13s;
+    left: 20%;
+    top: 30%;
+  }
+  
+  .ball:nth-child(3) {
+    animation-duration: 14s, 14s;
+    left: 70%;
+    top: 60%;
+  }
+  
+  .ball:nth-child(4) {
+    animation-duration: 16s, 15s;
+    left: 40%;
+    top: 10%;
+  }
+  
+  .ball:nth-child(5) {
+    animation-duration: 18s, 16s;
+    left: 80%;
+    top: 50%;
+  }
+  
+  /* Cube animation */
+  @keyframes cubeRotate {
+    0%, 100% {
+      transform: rotateX(1000deg) rotateY(1000deg);
+    }
+    50% {
+      transform: rotateX(1360deg) rotateY(1360deg);
+    }
+  }
+  
+  @keyframes cubeMove {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    25% {
+      transform: translate3d(100px, -150px, 50px);
+    }
+    50% {
+      transform: translate3d(-200px, 200px, -100px);
+    }
+    75% {
+      transform: translate3d(150px, -100px, -50px);
+    }
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  
+  .cube {
+    width: 200px; /* Cube size */
+    height: 200px; /* Cube size */
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform-style: preserve-3d;
+    animation: cubeMove 20s infinite ease-in-out, cubeRotate 10s infinite linear;
+  }
+  
+  .cube__face {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-color: rgba(173, 127, 255, 0.7); /* Lighter purple color */
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-sizing: border-box;
+  }
+  
+  .cube__face--front  { transform: rotateY(  0deg) translateZ(30px); }
+  .cube__face--back   { transform: rotateY(180deg) translateZ(30px); }
+  .cube__face--right  { transform: rotateY( 90deg) translateZ(30px); }
+  .cube__face--left   { transform: rotateY(-90deg) translateZ(30px); }
+  .cube__face--top    { transform: rotateX( 90deg) translateZ(30px); }
+  .cube__face--bottom { transform: rotateX(-90deg) translateZ(30px); }
