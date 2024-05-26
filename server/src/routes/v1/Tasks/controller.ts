@@ -45,6 +45,12 @@ export const getTasks = async (req: Request, res: Response) => {
     } else {
       tasks = await Task.find();
     }
+    //sorting tasks
+    tasks.sort((a, b) => {
+      const priorityOrder = { "high": 1, "medium": 2, "low": 3 };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
+    
     res.json(tasks);
   } catch (error) {
     console.error("Error fetching tasks:", error);

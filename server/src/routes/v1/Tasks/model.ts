@@ -5,7 +5,7 @@ export interface Task {
   title: string;
   description: string;
   dueDate: string;
-  priority: string;
+  priority:  "high" | "medium" | "low";
   createDate: Date;
   assigneeID: string;
   updateDate?: Date;
@@ -26,6 +26,7 @@ const taskSchema: Schema<Task> = new Schema({
   },
   priority: {
    type: String,
+   enum: ["high", "medium", "low"],
  },
   createDate: {
     type: Date,

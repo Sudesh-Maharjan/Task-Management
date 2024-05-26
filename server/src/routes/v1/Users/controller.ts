@@ -152,3 +152,14 @@ res.status(200).json({accessToken, refreshToken});
 res.status(500).send('Server error');
    }
 };
+
+//get all the users name and email
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await User.find({}, 'firstName lastName email');
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};  
