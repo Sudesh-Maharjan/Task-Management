@@ -10,9 +10,10 @@ export interface Task {
   assigneeID: string;
   updateDate?: Date;
   tags: string[];
+  status: "pending" | "in-progress" | "completed";
 }
 
-const taskSchema: Schema<Task> = new Schema({
+const TaskSchema: Schema<Task> = new Schema({
   title: {
     type: String,
     required: true,
@@ -38,9 +39,12 @@ const taskSchema: Schema<Task> = new Schema({
   assigneeID: {
     type: String,
   },
-  tags: [String],
-},
+  tags: {type: [String], required: true},
+  status: { type: String, enum: ["pending", "in-progress", "completed"], required: true
+
+   }
+  }
 );
 
-const Task = mongoose.model<Task>("Task", taskSchema);
+const Task = mongoose.model<Task>("Task", TaskSchema);
 export default Task;

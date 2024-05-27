@@ -1,15 +1,17 @@
 import { Request, Response } from "express";
 import Task, { Task as TaskType } from "./model";
+import { StatusCodes } from "http-status-codes";
 
 let tasks: TaskType[] = [];
 let currentId = 1;
 
 export const createTask = async (req: Request, res: Response) => {
-  const { title, description, dueDate, priority, assigneeID, tags } = req.body;
+  const { title, description, dueDate, priority, assigneeID, tags, status } = req.body;
 
   if (!title || !description) {
     return res.status(400).send("Title and Description is required");
   }
+  const taskStatus = status || "pending";
   const task: TaskType = {
     id: currentId++,
     title,
@@ -19,14 +21,15 @@ export const createTask = async (req: Request, res: Response) => {
     createDate: new Date(),
     assigneeID,
     tags: tags || [],
+    status: taskStatus,
   };
 
   try {
     const newTask = await Task.create(task);
-    res.status(201).json(newTask);
+    res.status(StatusCodes.CREATED).json(newTask);
   } catch (error) {
     console.error("Error creating task:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
 
@@ -71,25 +74,17 @@ export const getTask = async (req: Request, res: Response) => {
 };
 
 export const updateTask = async (req: Request, res: Response) => {
-  const taskId = req.params.id;
-  const { title, description, dueDate, priority, assigneeID, tags } = req.body;
+  const { id } = req.params;
+  const updates = req.body;
+
   try {
-    let task = await Task.findById(taskId);
-    if (!task) return res.status(404).send("Task not found");
-
-    task.title = title;
-    task.description = description;
-    task.dueDate = dueDate;
-    task.priority = priority;
-    task.assigneeID = assigneeID;
-    task.updateDate = new Date();
-    task.tags = tags || [];
-
-    await task.save();
+    const task = await Task.findByIdAndUpdate(id, updates, { new: true });
+    if (!task) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "Task not found" });
+    }
     res.json(task);
-  } catch (error) {
-    console.error("Error updating task:", error);
-    res.status(500).send("Internal Server Error");
+  } catch (error: any) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
   }
 };
 

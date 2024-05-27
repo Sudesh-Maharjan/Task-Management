@@ -15,10 +15,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, assignedUser, o
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg relative">
-      <div className="absolute top-0 right-0 m-4">
-      <div className="bg-purple-500 text-white px-4 py-2 rounded-md">
-            <span>{task.status}</span>
-          </div>
+      <div className="">
+     
           {assignedUser && (
             <div className="bg-purple-500 text-white px-4 py-2 rounded-md">
               <span>{assignedUser.firstName} {assignedUser.lastName}</span>
@@ -34,26 +32,31 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, assignedUser, o
         </div>
         <div className="mb-4">
           <h3 className="text-lg font-semibold">Title</h3>
-          <p>{task.title}</p>
+          <p className="capitalize">{task.title}</p>
         </div>
         <div className="mb-4">
           <h3 className="text-lg font-semibold">Description</h3>
-          <p>{task.description}</p>
+          <p className="capitalize">{task.description}</p>
         </div>
         <div className="mb-4">
           <h3 className="text-lg font-semibold">Due Date</h3>
-          <p>{task.dueDate}</p>
+          <p className="capitalize">{task.dueDate}</p>
         </div>
         <div className="mb-4">
           <h3 className="text-lg font-semibold">Priority</h3>
-          <p>{task.priority}</p>
+          <p className="capitalize">{task.priority}</p>
         </div>
-        <div className="flex justify-end">
+        <div className="absolute bottom-4 right-3">
           <Button variant={"purple"} onClick={() => onUpdate(task)} className="mr-2">
           <MdEdit className="mr-1" />
 
           </Button>
         </div>
+        <div className=" mb-4">
+        <h3 className="text-lg font-semibold">Priority</h3>
+
+            <span>{task.status}</span>
+          </div>
       </div>
     </div>
   );
