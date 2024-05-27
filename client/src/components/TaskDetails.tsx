@@ -16,6 +16,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, assignedUser, o
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg relative">
       <div className="absolute top-0 right-0 m-4">
+      <div className="bg-purple-500 text-white px-4 py-2 rounded-md">
+            <span>{task.status}</span>
+          </div>
           {assignedUser && (
             <div className="bg-purple-500 text-white px-4 py-2 rounded-md">
               <span>{assignedUser.firstName} {assignedUser.lastName}</span>

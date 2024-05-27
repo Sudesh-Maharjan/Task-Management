@@ -8,6 +8,9 @@ import RightSidebar from "../components/Sidebar";
 import TaskDetailModal from "../components/TaskDetails";
 import { FaPlus } from "react-icons/fa6";
 import { FaEye } from "react-icons/fa";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import "../components/styles.css";
+import { DropResult } from "react-beautiful-dnd";
 
 interface Task {
   _id: string;
@@ -16,6 +19,7 @@ interface Task {
   dueDate: string;
   priority: "high" | "medium" | "low";
   assigneeID: string;
+  status: "pending" | "in-progress" | "completed";
 }
 
 const Home: React.FC = () => {
@@ -24,6 +28,11 @@ const Home: React.FC = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const accessToken = localStorage.getItem("accessToken");
+
+  //workflow stages
+  const pendingTasks = tasks.filter((task) => task.status === "pending");
+  const inProgressTasks = tasks.filter((task) => task.status === "in-progress");
+  const completedTasks = tasks.filter((task) => task.status === "completed");
 
   useEffect(() => {
     if (!accessToken) {
@@ -72,7 +81,10 @@ const Home: React.FC = () => {
         setSelectedTask(null);
       })
       .catch((error) => {
-        console.error(`Error ${task._id ? "updating" : "creating"} task:`, error);
+        console.error(
+          `Error ${task._id ? "updating" : "creating"} task:`,
+          error
+        );
       });
   };
 
@@ -99,12 +111,291 @@ const Home: React.FC = () => {
     setSelectedTask(task);
     setShowModal(true);
   };
+  const handleDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+    if (!destination) return;
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const updatedTasks = tasks.map((task) => {
+      if (task._id === draggableId) {
+        return {
+          ...task,
+          status: destination.droppableId as Task["status"],
+        };
+      }
+      return task;
+    });
+
+    axios
+      .put(
+        `${API_BASE_URL}/tasks/${draggableId}`,
+        { status: destination.droppableId },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
+      .then(() => {
+        setTasks(updatedTasks);
+      })
+      .catch((error) => {
+        console.error("Error updating task status:", error);
+      });
+  };
 
   return (
     <>
       <Navigation />
-      <div className="container mx-auto my-14">
-        <div className="flex flex-wrap -mx-4">
+      <h1 className="text-4xl text-center my-3 font-bold">Kanban View</h1>
+      <div className="my-4 grid grid-cols-3 gap-2">
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="flex justify-between h-80 gap-2">
+            <Droppable droppableId="pending">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="w-[600px] bg-red-100 p-4 rounded-md  hover:cursor-pointer scrollable-container"
+                  style={{ maxHeight: "500px", overflowY: "auto" }}
+                >
+                  <h2 className="text-lg font-semibold mb-4 flex justify-center">
+                    Pending
+                  </h2>
+                  {pendingTasks.map((task, index) => (
+                    <Draggable
+                      key={task._id}
+                      draggableId={task._id}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="w-[400px] h-[250px] m-2  bg-purple-100 hover:bg-purple-200 transition duration-500 hover:cursor-pointer hover:shadow-lg p-4 rounded-lg shadow-md flex flex-col justify-between"
+                        >
+                          <div className="text-lg font-semibold mb-2">
+                            {task.title}
+                          </div>
+                          <div className="text-gray-700 mb-2">
+                            {task.description}
+                          </div>
+                          <div className="text-gray-600 mb-2">
+                            Due: {task.dueDate}
+                          </div>
+                          <div
+                            className={`mb-2 ${
+                              task.priority === "high"
+                                ? "text-red-500"
+                                : task.priority === "medium"
+                                ? "text-yellow-500"
+                                : "text-green-500"
+                            }`}
+                          >
+                            Priority: {task.priority}
+                          </div>
+                          <div>Status: {task.status}</div>
+                          <div className="flex justify-end relative">
+                            <Button
+                              className="text-white px-4 py-2 rounded-md mr-2 flex items-center bg-black"
+                              onClick={() => handleViewTask(task)}
+                            >
+                              <FaEye />
+                            </Button>
+                            <Button
+                              variant={"purple"}
+                              className=" text-white px-4 py-2 rounded-md mr-2 flex items-center"
+                              onClick={() => handleEditTask(task)}
+                            >
+                              <MdEdit className="mr-1" />
+                            </Button>
+                            <Button
+                              variant={"destructive"}
+                              className=" text-white px-4 py-2 rounded-md flex items-center"
+                              onClick={() => handleDeleteTask(task._id)}
+                            >
+                              <MdDelete className="mr-1" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+            {/* Similarly, add Droppable components for In Progress and Completed stages */}
+          </div>
+          <div className="flex justify-between mb-8 h-80 gap-2">
+            <Droppable droppableId="in-progress">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="w-[600px] bg-yellow-100 p-4 rounded-md mr-2 hover:cursor-pointer scrollable-container"
+                  style={{ maxHeight: "500px", overflowY: "auto" }}
+                >
+                  <h2 className="text-lg font-semibold mb-4 flex justify-center">
+                    In Progress
+                  </h2>
+                  {inProgressTasks.map((task, index) => (
+                    <Draggable
+                      key={task._id}
+                      draggableId={task._id}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="w-[400px] h-[250px] m-2 bg-purple-100 hover:bg-purple-200 transition duration-500 hover:cursor-pointer hover:shadow-lg p-4 rounded-lg shadow-md flex flex-col justify-between"
+                        >
+                          <div className="text-lg font-semibold mb-2">
+                            {task.title}
+                          </div>
+                          <div className="text-gray-700 mb-2">
+                            {task.description}
+                          </div>
+                          <div className="text-gray-600 mb-2">
+                            Due: {task.dueDate}
+                          </div>
+                          <div
+                            className={`mb-2 ${
+                              task.priority === "high"
+                                ? "text-red-500"
+                                : task.priority === "medium"
+                                ? "text-yellow-500"
+                                : "text-green-500"
+                            }`}
+                          >
+                            Priority: {task.priority}
+                          </div>
+                          <div>Status: {task.status}</div>
+                          <div className="flex justify-end mt-4">
+                            <Button
+                              className="text-white px-4 py-2 rounded-md mr-2 flex items-center bg-black"
+                              onClick={() => handleViewTask(task)}
+                            >
+                              <FaEye />
+                            </Button>
+                            <Button
+                              variant={"purple"}
+                              className=" text-white px-4 py-2 rounded-md mr-2 flex items-center"
+                              onClick={() => handleEditTask(task)}
+                            >
+                              <MdEdit className="mr-1" />
+                            </Button>
+                            <Button
+                              variant={"destructive"}
+                              className=" text-white px-4 py-2 rounded-md flex items-center"
+                              onClick={() => handleDeleteTask(task._id)}
+                            >
+                              <MdDelete className="mr-1" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+            {/* Similarly, add Droppable components for In Progress and Completed stages */}
+          </div>
+
+          {/* completed */}
+          <div className="flex justify-between mb-8 h-80 gap-2">
+            {/* Droppable for Pending tasks */}
+            <Droppable droppableId="completed">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="w-[600px] bg-green-200 p-4 rounded-md mr-2 hover:cursor-pointer scrollable-container"
+                  style={{ maxHeight: "500px", overflowY: "auto" }}
+                >
+                  <h2 className="text-lg font-semibold mb-4 flex justify-center">
+                    Completed
+                  </h2>
+                  {/* Display tasks for pending stage */}
+                  {completedTasks.map((task, index) => (
+                    <Draggable
+                      key={task._id}
+                      draggableId={task._id}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className=" w-[400px] h-[250px]  m-2 bg-purple-100 hover:bg-purple-200 transition duration-500 hover:cursor-pointer hover:shadow-lg p-4 rounded-lg shadow-md flex flex-col h-full justify-between"
+                        >
+                          <div className="text-lg font-semibold mb-2">
+                            {task.title}
+                          </div>
+                          <div className="text-gray-700 mb-2">
+                            {task.description}
+                          </div>
+                          <div className="text-gray-600 mb-2">
+                            Due: {task.dueDate}
+                          </div>
+                          <div
+                            className={`mb-2 ${
+                              task.priority === "high"
+                                ? "text-red-500"
+                                : task.priority === "medium"
+                                ? "text-yellow-500"
+                                : "text-green-500"
+                            }`}
+                          >
+                            Priority: {task.priority}
+                          </div>
+                          <div>Status: {task.status}</div>
+                          <div className="flex justify-end mt-4">
+                            <Button
+                              className="text-white px-4 py-2 rounded-md mr-2 flex items-center bg-black"
+                              onClick={() => handleViewTask(task)}
+                            >
+                              <FaEye />
+                            </Button>
+                            <Button
+                              variant={"purple"}
+                              className=" text-white px-4 py-2 rounded-md mr-2 flex items-center"
+                              onClick={() => handleEditTask(task)}
+                            >
+                              <MdEdit className="mr-1" />
+                            </Button>
+                            <Button
+                              variant={"destructive"}
+                              className=" text-white px-4 py-2 rounded-md flex items-center"
+                              onClick={() => handleDeleteTask(task._id)}
+                            >
+                              <MdDelete className="mr-1" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+            {/* Similarly, add Droppable components for In Progress and Completed stages */}
+          </div>
+        </DragDropContext>
+        {/* <div className="flex flex-wrap -mx-4">
         {tasks.map((task) => (
             <div
               className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 px-4 mb-4"
@@ -117,9 +408,9 @@ const Home: React.FC = () => {
                   <p className={`mb-2 ${task.priority === "high" ? "text-red-500" : task.priority === "medium" ? "text-yellow-500" : "text-green-500"}`}>
                     Priority: {task.priority}
                   </p>
-
+                  <p>Status: {task.status}</p>
                 </div>
-                <div className="flex justify-end mt-4" key={task._id}>
+                <div className="flex justify-end mt-4">
                 <Button 
                    className="text-white px-4 py-2 rounded-md mr-2 flex items-center bg-black"
                     onClick={() => handleViewTask(task)}
@@ -142,14 +433,14 @@ const Home: React.FC = () => {
               </div>
             </div>
           ))}
-        </div>
+        </div> */}
         <div className="fixed bottom-4 right-4">
           <Button
             variant={"purple"}
             className="text-white px-4 py-2 rounded-md transform hover:rotate-180 rounded-ss-2xl transition duration-1000"
             onClick={() => setShowSidebar(true)}
           >
-           <FaPlus />
+            <FaPlus />
           </Button>
         </div>
       </div>

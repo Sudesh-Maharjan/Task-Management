@@ -9,6 +9,7 @@ interface Task {
   dueDate: string;
   priority: "high" | "medium" | "low";
   assigneeID: string;
+  status: "pending" | "in-progress" | "completed";
 }
 
 interface User {
@@ -24,15 +25,17 @@ const Sidebar: React.FC<{ selectedTask: Task | null; onClose: () => void; onTask
     description: "",
     dueDate: "",
     priority: "low", // Default value
-    assigneeID: ""
+    assigneeID: "",
+    status: "pending",
   });
-
+  const [status, setStatus] = useState<Task["status"]>("pending"); 
   const [users, setUsers] = useState<User[]>([]);
   const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
     if (selectedTask) {
       setTask(selectedTask);
+       setStatus(selectedTask.status);
     }
   }, [selectedTask]);
 
@@ -58,23 +61,18 @@ const Sidebar: React.FC<{ selectedTask: Task | null; onClose: () => void; onTask
   //function to handle user assignment
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-   const { id, value } = e.target;
-   if (id === "assigneeID") {
-     // If the assigneeID field is being updated, find the user object by its ID
-     const selectedUser = users.find(user => user._id === value);
-     if (selectedUser) {
-       // If the selected user exists, update the assigneeID with the selected user's ID
-       setTask({ ...task, assigneeID: selectedUser._id });
-     } else {
-       // If the selected user does not exist, set assigneeID to empty.
-       setTask({ ...task, assigneeID: "" });
-     }
-   } else {
-     setTask({ ...task, [id]: value });
-   }
+    const { id, value } = e.target;
+    if (id === "status") {
+      setStatus(value as Task["status"]); // Update selected status
+    } else if (id === "assigneeID") {
+      setTask({ ...task, assigneeID: value });
+    } else {
+      setTask({ ...task, [id]: value });
+    }
+
  };
   const handleSubmit = () => {
-    onTaskSubmit(task);
+    onTaskSubmit({...task, status});
   };
 
   return (
@@ -166,6 +164,21 @@ const Sidebar: React.FC<{ selectedTask: Task | null; onClose: () => void; onTask
           >
             Cancel
           </button>
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="status">
+            Status
+          </label>
+          <select
+            className="border rounded w-full py-2 px-3 text-gray-700"
+            id="status"
+            value={status}
+            onChange={handleChange}
+          >
+            <option value="pending">Pending</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
         </div>
       </form>
     </div>
