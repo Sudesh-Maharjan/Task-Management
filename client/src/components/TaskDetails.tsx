@@ -1,6 +1,5 @@
 import React from "react";
 import { MdClose } from "react-icons/md";
-import { Task } from "../"; 
 import { Button } from "@/components/ui/button";
 import { MdEdit } from "react-icons/md";
 

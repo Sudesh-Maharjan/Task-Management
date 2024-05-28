@@ -3,26 +3,33 @@ import { Button } from "@/components/ui/button";
 import TaskDetailModal from "../components/TaskDetails";
 import { FaEye } from "react-icons/fa";
 import { MdDelete, MdEdit } from "react-icons/md";
+import RightSidebar from "../components/Sidebar";
 
+interface Task {
+  _id: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  priority: "high" | "medium" | "low";
+  assigneeID: string;
+  status: "pending" | "in-progress" | "completed";
+}
 
 const ListView: React.FC<{
    tasks: Task[];
    onTaskDelete: (id: string) => void;
    onTaskUpdate: (task: Task) => void;
- }> = ({ tasks, onTaskDelete, onTaskUpdate }) => {
+   onViewTask: (task: Task) => void;
+   onEditTask: (task: Task) => void;
+   onDeleteTask: (task: Task) => void;
+ }> = ({ tasks, onDeleteTask, onEditTask, onViewTask , onTaskDelete}) => {
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [sortByTitleAsc, setSortByTitleAsc] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [showSidebar, setShowSidebar] = useState(false);
 
-  const handleViewTask = (task: Task) => {
-    setSelectedTask(task);
-    setShowModal(true);
-  };
-  const handleUpdateTask = (task: Task) => {
-   onTaskUpdate(task);
-  };
   const handleDeleteSelectedTasks = () => {
     selectedTasks.forEach((taskId) => {
       onTaskDelete(taskId);
@@ -75,7 +82,7 @@ const ListView: React.FC<{
           className="px-4 py-2"
           onClick={handleDeleteSelectedTasks}
         >
-          Delete Selected
+                          <MdDelete />
         </Button>
       </div>
       
@@ -111,23 +118,23 @@ const ListView: React.FC<{
               {task.priority}
             </td>
             <td className="border border-purple-200 px-4 py-2 capitalize">{task.status}</td>
-            <td className="border border-purple-200 px-4 py-2">
-              <Button
-                className="text-white px-4 py-2 rounded-md bg-black"
-                onClick={() => handleViewTask(task)}
+            <td className="border border-purple-200 px-4 py-2 flex justify-center ">
+              <Button variant={"purple"}
+                className="text-white rounded-md mx-5"
+                onClick={() => onViewTask(task)}
               >
                 <FaEye />
               </Button>
-              <Button
-                className="text-white px-4 py-2 rounded-md ml-2"
-                onClick={() => handleUpdateTask(task)}
+              <Button variant={"purple"}
+                className="text-white rounded-md mx-5"
+                onClick={() => onEditTask(task)}
               >
                 <MdEdit />
               </Button>
               <Button
-                variant="destructive"
-                className="text-white px-4 py-2 rounded-md ml-2"
-                onClick={() => onTaskDelete(task._id)}
+                variant={"purple"}
+                className="text-white rounded-md mx-5"
+                onClick={() => onDeleteTask(task._id)}
               >
                 <MdDelete />
               </Button>
@@ -137,6 +144,15 @@ const ListView: React.FC<{
       </tbody>
     </table>
   </div>
+  {showSidebar && selectedTask && (
+        <RightSidebar
+          selectedTask={selectedTask}
+          onClose={() => {
+            setShowSidebar(false);
+            setSelectedTask(null);
+          }}
+        />
+        )}
   {showModal && selectedTask && (
     <TaskDetailModal
       task={selectedTask}
