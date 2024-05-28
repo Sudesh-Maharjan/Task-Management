@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import TaskDetailModal from "../components/TaskDetails";
 import { FaEye } from "react-icons/fa";
 import { MdDelete, MdEdit } from "react-icons/md";
 import RightSidebar from "../components/Sidebar";
-
+import axios from "axios";
+import debounce from "lodash/debounce"; 
 interface Task {
   _id: string;
   title: string;
@@ -13,23 +14,50 @@ interface Task {
   priority: "high" | "medium" | "low";
   assigneeID: string;
   status: "pending" | "in-progress" | "completed";
+  tags: string[];
 }
 
 const ListView: React.FC<{
    tasks: Task[];
    onTaskDelete: (id: string) => void;
-   onTaskUpdate: (task: Task) => void;
+   onTaskUpdate: (task: Task[]) => void;
    onViewTask: (task: Task) => void;
    onEditTask: (task: Task) => void;
    onDeleteTask: (task: Task) => void;
- }> = ({ tasks, onDeleteTask, onEditTask, onViewTask , onTaskDelete}) => {
+ }> = ({ tasks, onDeleteTask, onEditTask, onViewTask , onTaskDelete, onTaskUpdate}) => {
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [sortByTitleAsc, setSortByTitleAsc] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
+  useEffect(() => {
+    // Fetch tasks on component mount or when search query changes
+    fetchTasks();
+  }, [searchQuery]);
+
+  const fetchTasks = debounce(() => {
+    axios
+      .get(`http://localhost:8000/api/v1/tasks`,{
+        params: { tags: searchQuery },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      
+      })
+      .then((response) => {
+        onTaskUpdate(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching tasks:", error);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+        }
+      });
+}, 500);
+  
   const handleDeleteSelectedTasks = () => {
     selectedTasks.forEach((taskId) => {
       onTaskDelete(taskId);
@@ -62,14 +90,17 @@ const ListView: React.FC<{
    setSortByTitleAsc(!sortByTitleAsc);
    setSelectedTasks([]);
    setSelectAll(false);
-   setTasks(sortedTasks);
  };
+ const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  setSearchQuery(event.target.value);
+};
+
   return (
    <>
-  <h1 className="text-4xl text-center my-3 font-bold">Task List</h1>
+  <h1 className="text-4xl text-center font-bold">Task List</h1>
   <div className="my-4">
     <div className="flex justify-between mb-4">
-      <div>
+      <div className="flex justify-center items-center">
         <Button
           variant="purple"
           className="px-4 py-2 mr-2"
@@ -84,6 +115,19 @@ const ListView: React.FC<{
         >
                           <MdDelete />
         </Button>
+        <div className="container flex justify-center items-center px-4 sm:px-6 lg:px-8 ">
+        <div className="relative">
+
+            <input type="text" className="h-10 w-96 pr-8 pl-5 rounded z-0 focus:shadow focus:outline-none border border-purple-200" placeholder="Search tasks..."
+             value={searchQuery}
+             onChange={handleSearchInputChange}></input>
+
+            <div className="absolute top-4 right-3">
+                <i className="fa fa-search text-gray-400 z-20 hover:text-gray-500"></i>
+            </div>
+
+        </div>
+    </div>
       </div>
       
     </div>
@@ -101,6 +145,8 @@ const ListView: React.FC<{
         </tr>
       </thead>
       <tbody>
+
+        
         {tasks.map((task) => (
           <tr key={task._id} className={`hover:bg-purple-100 hover:cursor-pointer ${selectedTasks.includes(task._id) ? "border border-purple-600" : ""}`}>
             <td className="border border-purple-200 px-4 py-2 capitalize">

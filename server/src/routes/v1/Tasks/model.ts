@@ -11,6 +11,11 @@ export interface Task {
   updateDate?: Date;
   tags: string[];
   status: "pending" | "in-progress" | "completed";
+   color?: {
+    pending: string;
+    inProgress: string;
+    completed: string;
+  };
 }
 
 const TaskSchema: Schema<Task> = new Schema({

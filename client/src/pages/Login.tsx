@@ -43,7 +43,7 @@ const Login = () => {
       setTimeout(() => {
         setShowLoginSuccess(false);
         navigate('/home');
-      }, 2000);
+      }, 1000);
 
     } catch (error) {
       if (axios.isAxiosError(error)) {

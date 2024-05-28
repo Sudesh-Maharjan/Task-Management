@@ -34,30 +34,39 @@ export const createTask = async (req: Request, res: Response) => {
 };
 
 export const getTasks = async (req: Request, res: Response) => {
-  const { tag } = req.query;
+  const { tags, search } = req.query;
+  
   try {
-    let tasks;
-    if (tag) {
-      tasks = await Task.find({
-        $or: [
-          { tags: tag as string },
-          { title: { $regex: tag as string, $options: "i" } },
-          { description: { $regex: tag as string, $options: "i" } },
-        ],
-      });
-    } else {
-      tasks = await Task.find();
+    let query = {};
+
+    if (tags) {
+      const tagsArray = (tags as string).split(',').map(tag => tag.trim());
+      query = { ...query, tags: { $all: tagsArray.map(tag => new RegExp(tag, 'i')) } };
     }
-    //sorting tasks
+
+    if (search) {
+      const searchRegex = new RegExp(search as string, 'i');
+      query = { 
+        ...query, 
+        $or: [
+          { title: { $regex: searchRegex } },
+          { description: { $regex: searchRegex } }
+        ] 
+      };
+    }
+
+    let tasks = await Task.find(query);
+
+    // Sorting tasks by priority
     tasks.sort((a, b) => {
       const priorityOrder = { "high": 1, "medium": 2, "low": 3 };
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
-    
+
     res.json(tasks);
   } catch (error) {
     console.error("Error fetching tasks:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
   }
 };
 

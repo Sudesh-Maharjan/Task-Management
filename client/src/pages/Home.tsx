@@ -19,6 +19,8 @@ interface Task {
   priority: "high" | "medium" | "low";
   assigneeID: string;
   status: "pending" | "in-progress" | "completed";
+  color?: { [key: string]: string };
+  tags: string[];
 }
 
 const Home: React.FC = () => {
@@ -86,7 +88,6 @@ const Home: React.FC = () => {
   const handleEditTask = (task: Task) => {
     setSelectedTask(task);
     setShowSidebar(true);
-    setIsCreateMode(false);
   };
 
   const handleDeleteTask = (id: string) => {
@@ -108,7 +109,10 @@ const Home: React.FC = () => {
     setSelectedTask(task);
     setShowModal(true);
   };
-
+  const handleTaskUpdate = (updatedTasks: Task[]) => {
+    setTasks(updatedTasks);
+  };
+  
   const moveTask = (taskId: string, status: string) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
@@ -133,7 +137,6 @@ const Home: React.FC = () => {
   return (
     <>
       <Navigation />
-      <a href="/main">Click hereh bro </a>
       <Tabs onSelectTab={setSelectedTab} />
       {selectedTab === "Kanban" && (
         <div>
@@ -174,6 +177,7 @@ const Home: React.FC = () => {
         onTaskDelete={handleDeleteTask}
         onDeleteTask={handleDeleteTask}
         onViewTask={handleViewTask}
+        onTaskUpdate={handleTaskUpdate}
       />
       )}
        {showSidebar && (

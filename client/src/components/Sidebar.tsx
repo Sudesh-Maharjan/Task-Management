@@ -10,6 +10,7 @@ interface Task {
   priority: "high" | "medium" | "low";
   assigneeID: string;
   status: "pending" | "in-progress" | "completed";
+  tags: string[];
 }
 
 interface User {
@@ -27,9 +28,11 @@ const Sidebar: React.FC<{ selectedTask: Task | null; onClose: () => void; onTask
     priority: "low", // Default value
     assigneeID: "",
     status: "pending",
+  tags: [], 
   });
   const [status, setStatus] = useState<Task["status"]>("pending"); 
   const [users, setUsers] = useState<User[]>([]);
+  const [enteredTags, setEnteredTags] = useState<string[]>(selectedTask ? selectedTask.tags : []);
   const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
@@ -66,22 +69,25 @@ const Sidebar: React.FC<{ selectedTask: Task | null; onClose: () => void; onTask
       setStatus(value as Task["status"]); // Update selected status
     } else if (id === "assigneeID") {
       setTask({ ...task, assigneeID: value });
-    } else {
+    }else if (id === "tags") {
+      const tagsArray = value.split(",").map(tag => tag.trim());
+      setEnteredTags(tagsArray);
+    }else {
       setTask({ ...task, [id]: value });
     }
 
  };
   const handleSubmit = () => {
-    onTaskSubmit({...task, status});
+    onTaskSubmit({...task, status, tags: enteredTags});
   };
 
   return (
-    <div className="fixed right-0 top-0 w-1/3 h-full bg-white p-8 shadow-md">
+    <div className="fixed right-0 top-0 w-1/3 h-full bg-white p-8 shadow-md overflow-y-auto" style={{ maxHeight: '100vh' }}>
       <h2 className="text-2xl font-semibold mb-4">
         {selectedTask ? "Update Task" : "Create Task"}
       </h2>
       <form>
-        <div className="mb-4">
+        <div className="mb-4"  >
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
             Title
           </label>
@@ -150,20 +156,6 @@ const Sidebar: React.FC<{ selectedTask: Task | null; onClose: () => void; onTask
           </select>
         </div>
         <div className="flex justify-end">
-          <button
-            type="button"
-            className="bg-purple-500 text-white px-4 py-2 rounded-md mr-2"
-            onClick={handleSubmit}
-          >
-            {selectedTask ? "Update" : "Create"}
-          </button>
-          <button
-            type="button"
-            className="bg-gray-500 text-white px-4 py-2 rounded-md"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="status">
@@ -180,6 +172,34 @@ const Sidebar: React.FC<{ selectedTask: Task | null; onClose: () => void; onTask
             <option value="completed">Completed</option>
           </select>
         </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="tags">
+            Tags
+          </label>
+          <input
+            className="border rounded w-full py-2 px-3 text-gray-700"
+            id="tags"
+            type="text"
+            value={enteredTags}
+            onChange={handleChange}
+            placeholder="Enter tags (comma-separated)"
+          />
+        </div>
+          <button
+            type="button"
+            className="bg-purple-500 text-white px-4 py-2 rounded-md mr-2"
+            onClick={handleSubmit}
+          >
+            {selectedTask ? "Update" : "Create"}
+          </button>
+          <button
+            type="button"
+            className="bg-gray-500 text-white px-4 py-2 rounded-md"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+
       </form>
     </div>
   );
