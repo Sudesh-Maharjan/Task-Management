@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import API_BASE_URL from "../../config";
-
+import moment from "moment";
 interface Task {
   _id?: string;
   title: string;
@@ -80,7 +80,16 @@ const Sidebar: React.FC<{ selectedTask: Task | null; onClose: () => void; onTask
   const handleSubmit = () => {
     onTaskSubmit({...task, status, tags: enteredTags});
   };
-
+  const getCurrentDate = (): string => {
+    return moment().format("YYYY-MM-DD");
+  };
+   const formatDueDate = (dueDate: string): string => {
+    const due = moment(dueDate);
+    const now = moment();
+    const daysToGo = due.diff(now, 'days');
+    const formattedDate = due.format("DD MMMM YYYY");
+    return `${formattedDate} (${daysToGo} days to go)`;
+  };
   return (
     <div className="fixed right-0 top-0 w-1/3 h-full bg-white p-8 shadow-md overflow-y-auto" style={{ maxHeight: '100vh' }}>
       <h2 className="text-2xl font-semibold mb-4">
@@ -120,7 +129,9 @@ const Sidebar: React.FC<{ selectedTask: Task | null; onClose: () => void; onTask
             type="date"
             value={task.dueDate}
             onChange={handleChange}
+            min={getCurrentDate()}
           />
+           <p className="text-gray-700 mt-2">{task.dueDate ? formatDueDate(task.dueDate) : ''}</p>
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="priority">

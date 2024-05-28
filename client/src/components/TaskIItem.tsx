@@ -3,7 +3,22 @@ import { useDrag } from "react-dnd";
 import { MdDelete, MdEdit } from "react-icons/md"
 import { FaEye } from "react-icons/fa";
 import { Button } from "./ui/button";
-const TaskItem = ({ task, onEditTask, onDeleteTask, onViewTask }) => {
+import moment from "moment";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { FaCircleUser } from "react-icons/fa6";
+
+interface User {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+const TaskItem = ({ task, onEditTask, onDeleteTask, onViewTask, assignedUser}) => {
+  console.log(assignedUser)
   const [{ isDragging }, drag] = useDrag({
     type: "TASK",
     item: { _id: task._id },
@@ -11,17 +26,40 @@ const TaskItem = ({ task, onEditTask, onDeleteTask, onViewTask }) => {
       isDragging: !!monitor.isDragging(),
     }),
   });
-
+  const formatDueDate = (dueDate) => {
+    const due = moment(dueDate);
+    const now = moment();
+    const daysToGo = due.diff(now, 'days');
+    const formattedDate = due.format("DD MMMM YYYY");
+    return `${formattedDate} (${daysToGo} days to go)`;
+  };
   return (
     <div
       ref={drag}
-      className={`w-[400px] h-[250px] m-2 p-4 rounded-lg shadow-md flex flex-col justify-between hover:cursor-pointer ${
+      className={`w-[400px] h-[250px] relative m-2 p-4 rounded-lg shadow-md flex flex-col justify-between hover:cursor-pointer ${
         isDragging ? "bg-gray-400" : "bg-purple-100"
       }`}
     >
+      <div className="absolute right-6">
+      <Popover> 
+  <PopoverTrigger className="text-3xl"><FaCircleUser /></PopoverTrigger>
+  <PopoverContent>
+   
+  {assignedUser ? (
+              <div>
+                <div>{`${assignedUser.firstName} ${assignedUser.lastName}`}</div>
+                <div>{assignedUser.email}</div>
+              </div>
+            ) : (
+              "No Assignee"
+            )}
+  </PopoverContent>
+</Popover>
+
+      </div>
       <div className="text-lg font-semibold mb-2 capitalize">{task.title}</div>
       <div className="text-gray-700 mb-2 capitalize">{task.description}</div>
-      <div className="text-gray-600 mb-2 capitalize">Due: {task.dueDate}</div>
+      <div className="text-gray-600 mb-2 capitalize">Due: {formatDueDate(task.dueDate)}</div>
       <div
         className={`mb-2 capitalize ${
           task.priority === "high"

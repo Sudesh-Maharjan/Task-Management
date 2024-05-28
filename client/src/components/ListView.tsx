@@ -6,6 +6,8 @@ import { MdDelete, MdEdit } from "react-icons/md";
 import RightSidebar from "../components/Sidebar";
 import axios from "axios";
 import debounce from "lodash/debounce"; 
+import moment from "moment";
+
 interface Task {
   _id: string;
   title: string;
@@ -94,7 +96,13 @@ const ListView: React.FC<{
  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   setSearchQuery(event.target.value);
 };
-
+const formatDueDate = (dueDate) => {
+  const due = moment(dueDate);
+  const now = moment();
+  const daysToGo = due.diff(now, 'days');
+  const formattedDate = due.format("DD MMMM YYYY");
+  return `${formattedDate} (${daysToGo} days to go)`;
+};
   return (
    <>
   <h1 className="text-4xl text-center font-bold">Task List</h1>
@@ -159,7 +167,7 @@ const ListView: React.FC<{
               {task.title}
             </td>
             <td className="border border-purple-200 px-4 py-2 capitalize">{task.description}</td>
-            <td className="border border-purple-200 px-4 py-2 capitalize">{task.dueDate}</td>
+            <td className="border border-purple-200 px-4 py-2 capitalize">{formatDueDate(task.dueDate)}</td>
             <td className={`border border-purple-200 px-4 py-2 capitalize ${task.priority === "high" ? "text-red-500" : task.priority === "medium" ? "text-yellow-500" : "text-green-500"}`}>
               {task.priority}
             </td>

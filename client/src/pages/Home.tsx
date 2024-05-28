@@ -140,7 +140,7 @@ const Home: React.FC = () => {
       <Tabs onSelectTab={setSelectedTab} />
       {selectedTab === "Kanban" && (
         <div>
-          <h1 className="text-4xl text-center my-3 font-bold">Kanban View</h1>
+          <h1 className="text-3xl text-center my-3 font-bold">Kanban View</h1>
           <div className="my-4 grid grid-cols-3 gap-2">
             <TaskList
               tasks={tasks.filter((task) => task.status === "pending")}
