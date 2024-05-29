@@ -1,23 +1,7 @@
 import React from "react";
 import { useDrop } from "react-dnd";
 import TaskItem from "./TaskIItem";
-
-interface Task {
-  _id: string;
-  title: string;
-  description: string;
-  dueDate: string;
-  priority: "high" | "medium" | "low";
-  assigneeID: string;
-  status: "pending" | "in-progress" | "completed";
-  color?: { [key: string]: string };
-}
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
+import {Task} from '../../src/types';
 
 const TaskList:React.FC<{
   tasks: Task[];
@@ -26,7 +10,7 @@ const TaskList:React.FC<{
   onViewTask: (task: Task) => void;
   onEditTask: (task: Task) => void;
   onDeleteTask: (id: string) => void;
-  users: User[];}> = ({ tasks, status, moveTask, onEditTask, onDeleteTask, onViewTask, users }) => {
+}> = ({ tasks, status, moveTask, onEditTask, onDeleteTask, onViewTask}) => {
   const [{ isOver }, drop] = useDrop({
     accept: "TASK",
     drop: (item) => moveTask(item._id, status),
@@ -49,15 +33,14 @@ const TaskList:React.FC<{
       </h2>
       <div className="flex flex-col items-center" style={{ maxHeight: "400px", overflowY: "auto" }}>
       {tasks.map((task) => (
-       <TaskItem
-       key={task._id}
-       task={task}
-       onEditTask={onEditTask}
-       onDeleteTask={onDeleteTask}
-       onViewTask={onViewTask}
-      assignedUser={users? users.find((user) => user._id === task.assigneeID): null} 
-     />
-      ))}
+          <TaskItem
+            key={task.id}
+            task={task}
+            onEditTask={onEditTask}
+            onDeleteTask={onDeleteTask}
+            onViewTask={onViewTask}
+          />
+        ))}
       </div>
     </div>
   );

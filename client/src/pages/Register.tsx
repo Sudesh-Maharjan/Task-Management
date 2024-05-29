@@ -20,7 +20,6 @@ const emailSchema = z.object({
 });
 
 
-
 type EmailFormData = {email: string};
 type OtpFormData = {email: string; password: string; otp: string; firstName: string; lastName: string};
 type FormData = EmailFormData | OtpFormData;

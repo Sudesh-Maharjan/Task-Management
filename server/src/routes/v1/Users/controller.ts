@@ -1,5 +1,6 @@
 import {Request, Response} from 'express';
 import User from './model';
+import Task from '../Tasks/model';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { sendOtpEmail } from './service';
@@ -162,4 +163,20 @@ export const getAllUsers = async (req: Request, res: Response) => {
     console.error("Error fetching users:", error);
     res.status(500).send("Internal Server Error");
   }
-};  
+};
+
+export const getUserById = async (req: Request, res: Response) => {
+  const userId = req.params.assigneeID;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+

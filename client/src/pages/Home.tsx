@@ -10,18 +10,8 @@ import Tabs from "@/components/Tabs";
 import TaskList from "@/components/TaskList";
 import { Button } from "@/components/ui/button";
 import { FaPlus } from "react-icons/fa";
+import {Task} from '../../src/types';
 
-interface Task {
-  _id: string;
-  title: string;
-  description: string;
-  dueDate: string;
-  priority: "high" | "medium" | "low";
-  assigneeID: string;
-  status: "pending" | "in-progress" | "completed";
-  color?: { [key: string]: string };
-  tags: string[];
-}
 
 const Home: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -157,6 +147,7 @@ const Home: React.FC = () => {
               onViewTask={handleViewTask} 
               onEditTask={handleEditTask} 
               onDeleteTask={handleDeleteTask}
+
             />
             <TaskList
               tasks={tasks.filter((task) => task.status === "completed")}
@@ -165,6 +156,7 @@ const Home: React.FC = () => {
               onViewTask={handleViewTask} 
               onEditTask={handleEditTask} 
               onDeleteTask={handleDeleteTask}
+
             />
           </div>
         </div>

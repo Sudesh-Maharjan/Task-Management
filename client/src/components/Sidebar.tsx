@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import API_BASE_URL from "../../config";
 import moment from "moment";
+import {User} from "../types";
+
 interface Task {
-  _id?: string;
+  id?: number;
   title: string;
   description: string;
   dueDate: string;
@@ -11,13 +13,6 @@ interface Task {
   assigneeID: string;
   status: "pending" | "in-progress" | "completed";
   tags: string[];
-}
-
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
 }
 
 const Sidebar: React.FC<{ selectedTask: Task | null; onClose: () => void; onTaskSubmit: (task: Task) => void; }> = ({ selectedTask, onClose, onTaskSubmit }) => {

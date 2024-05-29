@@ -2,7 +2,7 @@ import React from "react";
 import { MdClose } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import { MdEdit } from "react-icons/md";
-
+import { Task } from "@/types";
 interface TaskDetailModalProps {
   task: Task;
   assignedUser: { firstName: string; lastName: string; email: string } | null;

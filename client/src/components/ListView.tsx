@@ -7,27 +7,17 @@ import RightSidebar from "../components/Sidebar";
 import axios from "axios";
 import debounce from "lodash/debounce"; 
 import moment from "moment";
-
-interface Task {
-  _id: string;
-  title: string;
-  description: string;
-  dueDate: string;
-  priority: "high" | "medium" | "low";
-  assigneeID: string;
-  status: "pending" | "in-progress" | "completed";
-  tags: string[];
-}
+import {Task} from '../../src/types';
 
 const ListView: React.FC<{
    tasks: Task[];
-   onTaskDelete: (id: string) => void;
+   onTaskDelete: (id: number) => void;
    onTaskUpdate: (task: Task[]) => void;
    onViewTask: (task: Task) => void;
    onEditTask: (task: Task) => void;
    onDeleteTask: (task: Task) => void;
  }> = ({ tasks, onDeleteTask, onEditTask, onViewTask , onTaskDelete, onTaskUpdate}) => {
-  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [selectedTasks, setSelectedTasks] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [sortByTitleAsc, setSortByTitleAsc] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -66,14 +56,14 @@ const ListView: React.FC<{
     });
     setSelectedTasks([]);
   };
-  const handleSelectTask = (taskId: string) => {
+  const handleSelectTask = (taskId: number) => {
    if (selectedTasks.includes(taskId)) {
      setSelectedTasks(selectedTasks.filter((id) => id !== taskId));
    } else {
      setSelectedTasks([...selectedTasks, taskId]);
    }
  };
- const handleSelectAllTasks = () => {
+ const handleSelectAllTasks = (taskId: number) => {
    if (selectAll) {
      setSelectedTasks([]);
    } else {
@@ -96,7 +86,7 @@ const ListView: React.FC<{
  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   setSearchQuery(event.target.value);
 };
-const formatDueDate = (dueDate) => {
+const formatDueDate = (dueDate: string) => {
   const due = moment(dueDate);
   const now = moment();
   const daysToGo = due.diff(now, 'days');

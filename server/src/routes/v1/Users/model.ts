@@ -1,6 +1,7 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 interface User {
+  _id: string;
    firstName: string;
    lastName: string;
   email: string;

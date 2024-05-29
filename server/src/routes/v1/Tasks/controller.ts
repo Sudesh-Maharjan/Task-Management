@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Task, { Task as TaskType } from "./model";
 import { StatusCodes } from "http-status-codes";
-
+import User from '../Users/model';
 let tasks: TaskType[] = [];
 let currentId = 1;
 
@@ -54,7 +54,6 @@ export const getTasks = async (req: Request, res: Response) => {
         ] 
       };
     }
-
     let tasks = await Task.find(query);
 
     // Sorting tasks by priority

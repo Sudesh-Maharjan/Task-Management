@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { MdDelete, MdEdit } from "react-icons/md"
 import { FaEye } from "react-icons/fa";
@@ -10,15 +10,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { FaCircleUser } from "react-icons/fa6";
-
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-const TaskItem = ({ task, onEditTask, onDeleteTask, onViewTask, assignedUser}) => {
-  console.log(assignedUser)
+import {Task} from '../../src/types';
+import axios from "axios";
+import API_BASE_URL from "../../config";
+const TaskItem: React.FC<{
+  task: Task;
+  onEditTask: (task: Task) => void;
+  onDeleteTask: (id: string) => void;
+  onViewTask: (task: Task) => void;
+}> = ({ task, onEditTask, onDeleteTask, onViewTask}) => {
   const [{ isDragging }, drag] = useDrag({
     type: "TASK",
     item: { _id: task._id },
@@ -26,7 +26,36 @@ const TaskItem = ({ task, onEditTask, onDeleteTask, onViewTask, assignedUser}) =
       isDragging: !!monitor.isDragging(),
     }),
   });
-  const formatDueDate = (dueDate) => {
+
+  const [assigneeName, setAssigneeName] = useState<string>("");
+
+  useEffect(() => {
+    // Fetch assignee details when component mounts
+    fetchAssigneeName(task.assigneeID);
+  }, [task.assigneeID]);
+
+  const fetchAssigneeName = async (assigneeID: string) => {
+    try {
+      const token =  localStorage.getItem("accessToken");
+  
+      const response = await axios.get(`${API_BASE_URL}/users/allusers/${assigneeID}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const user = response.data;
+      if (user) {
+        const name = `${user.firstName} ${user.lastName}`;
+        setAssigneeName(name);
+      } else {
+        setAssigneeName("Unassigned");
+      }
+    } catch (error) {
+      console.error("Error fetching assignee details:", error);
+    }
+  };
+  const formatDueDate = (dueDate: string) => {
     const due = moment(dueDate);
     const now = moment();
     const daysToGo = due.diff(now, 'days');
@@ -43,17 +72,7 @@ const TaskItem = ({ task, onEditTask, onDeleteTask, onViewTask, assignedUser}) =
       <div className="absolute right-6">
       <Popover> 
   <PopoverTrigger className="text-3xl"><FaCircleUser /></PopoverTrigger>
-  <PopoverContent>
-   
-  {assignedUser ? (
-              <div>
-                <div>{`${assignedUser.firstName} ${assignedUser.lastName}`}</div>
-                <div>{assignedUser.email}</div>
-              </div>
-            ) : (
-              "No Assignee"
-            )}
-  </PopoverContent>
+  <PopoverContent>{assigneeName}</PopoverContent>
 </Popover>
 
       </div>
