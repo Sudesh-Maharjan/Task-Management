@@ -145,7 +145,7 @@ const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET |
 //set token to cookies
 res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, maxAge: 3600000 }); // 1 hour expiration
 res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, maxAge: 604800000 }); // 7 days expiration
-res.status(200).json({accessToken, refreshToken});
+res.status(200).json({accessToken, refreshToken, user: {firstName: user.firstName, lastName: user.lastName, email: user.email}});
 
    }catch(error){
 res.status(500).send('Server error');
@@ -162,7 +162,23 @@ export const getAllUsers = async (req: Request, res: Response) => {
     res.status(500).send("Internal Server Error");
   }
 };
+//Get user by id
+// export const getUser = async (req: Request, res: Response) => {
+//   const userId = req.params._id;
 
+//   try {
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).send('User not found');
+//     }
+//     res.status(200).json(user);
+//   } catch (error) {
+//     console.error("Error fetching user:", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// };
+
+//Assigned users
 export const getUserById = async (req: Request, res: Response) => {
   const userId = req.params.assigneeID;
 

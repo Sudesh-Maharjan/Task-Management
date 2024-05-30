@@ -8,6 +8,7 @@ router.post('/send-otp', sendOtp);
 router.post('/register', register)
 router.post('/login', login);
 router.get('/allusers', getAllUsers);
+// router.get('/:_id', getUser);
 router.get('/allusers/:assigneeID', getUserById);
 router.get('/user/settings',auth, getColorPreferences);
 router.post('/user/settings',auth, saveColorPreferences);

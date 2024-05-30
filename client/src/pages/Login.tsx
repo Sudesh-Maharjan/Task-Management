@@ -36,6 +36,7 @@ const Login = () => {
   // document.cookie = `accessToken=${accessToken};`;
   localStorage.setItem('accessToken', accessToken);
   localStorage.setItem('refreshToken', refreshToken);
+  localStorage.setItem('User_data', JSON.stringify(response.data.user));
 
       console.log('Login successful:', response.data);
       toast.success('Login successful!');
@@ -57,7 +58,7 @@ const Login = () => {
 
   return (
     <div className="relative flex justify-center items-center min-h-screen bg-purple-300">
-      {/* Animated Cubes */}
+      {/* Animated Cubes in Login page*/}
       <div className="absolute inset-0 overflow-hidden">
         <div className="cube">
           <div className="cube__face cube__face--front"></div>
@@ -93,7 +94,6 @@ const Login = () => {
         <div className="ball"></div>
         <div className="ball"></div>
       </div>
-
 
     
       <div className="p-5 bg-white bg-opacity-80 rounded-md shadow-lg relative z-10">

@@ -1,5 +1,4 @@
-import React from "react";
-import { Input } from "./ui/input";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoIosArrowDropdownCircle } from "react-icons/io";
@@ -12,24 +11,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast, Toaster } from "sonner";
 
-const Navigation = () => {
+
+const Navigation: React.FC<{
+  // user: User;
+}> = () => {
   //sidebar state manage
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  // const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] = useState(false);
+  const storeduser = localStorage.getItem("User_data");
+  const user = storeduser ? JSON.parse(storeduser) : null;
   const navigate = useNavigate();
   //toggle sidebar
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  // const openLogoutConfirmation = () => {
-  //   setIsLogoutConfirmationOpen(true);
-  // };
-
-  // const closeLogoutConfirmation = () => {
-  //   setIsLogoutConfirmationOpen(false);
-  // };
-
   // handle logout
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -42,6 +38,7 @@ const Navigation = () => {
   return (
     <>
       <nav className="bg-purple-400 border-gray-200 dark:bg-gray-900">
+        <Toaster/>
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <a
             href="/home"
@@ -50,6 +47,11 @@ const Navigation = () => {
             Task Management
           </a>
           <div className="flex md:order-2">
+          <div className="text-2xl font-bold">
+          {
+            user.firstName + " " + user.lastName
+          }
+          </div>
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Button variant={"transparent"} className="mx-6 border">
