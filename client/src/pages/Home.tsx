@@ -14,6 +14,8 @@ import { Task } from "../../src/types";
 import { toast, Toaster } from "sonner";
 // import { MdDone } from "react-icons/md";
 import SaveButton from "@/components/SaveButton";
+import ActivityLog from "@/components/ActivityLog";
+import moment from "moment";
 
 const Home: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -23,10 +25,12 @@ const Home: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const accessToken = localStorage.getItem("accessToken");
   const [selectedTab, setSelectedTab] = useState("Kanban");
-
   const [pendingColor, setPendingColor] = useState("#C084FC");
   const [inProgressColor, setInProgressColor] = useState("#C084FC");
   const [completedColor, setCompletedColor] = useState("#C084FC");
+
+  //logActivity State returns an array of strings.
+  const [activityLog, setActivityLog] = useState<string[]>([]);
   const fetchTasks = () => {
     axios
       .get<Task[]>(`${API_BASE_URL}/tasks`, {
@@ -44,6 +48,7 @@ const Home: React.FC = () => {
         }
       });
   };
+
   const fetchColors = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/users/user/settings`, {
@@ -69,9 +74,12 @@ const Home: React.FC = () => {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      });
+      }
+    ).then(() => logActivity("Colors saved successfully!")).catch(() => logActivity("Error saving colors!"));
       toast.success("Colors saved successfully!");
-    } catch (error) {
+    } 
+    
+    catch (error) {
       toast.error("Error saving colorsQ");
       
     }finally{
@@ -106,6 +114,7 @@ const Home: React.FC = () => {
         fetchTasks();
         setShowSidebar(false);
         setSelectedTask(null);
+        logActivity(task._id ? "Task updated" : "Task created");
       })
       .catch((error) => {
         toast.error(`Error ${task._id ? "updating" : "creating"} task:`, error);
@@ -126,6 +135,7 @@ const Home: React.FC = () => {
       })
       .then(() => {
         fetchTasks();
+        logActivity("Task deleted");
       })
       .catch((error) => {
         toast.error("Error deleting task:", error);
@@ -156,12 +166,17 @@ const Home: React.FC = () => {
             Authorization: `Bearer ${accessToken}`,
           },
         }
-      )
+      ).then(() => logActivity("Task status updated")).catch(() => logActivity("Error updating task status"))
       .catch((error) => {
         toast.error("Error updating task status:", error);
       });
   };
-
+//Activity Log
+const logActivity = (action: string) => {
+  const timestamp = moment().format('Do MMMM, dddd, YYYY'); // Format timestamp (Moment js)
+  const timeAgo = moment().startOf('minute').fromNow(); // Calculate time ago 
+  setActivityLog((prevLog) =>  [`${timestamp} ${timeAgo}: ${action}`, ...prevLog]); //prevLog -> takes the previous activity log and return a new array
+};
   return (
     <>
       <Navigation />
@@ -232,6 +247,7 @@ const Home: React.FC = () => {
          
         </div>
       )}
+    
       {selectedTab === "List" && (
         <ListView
           tasks={tasks}
@@ -273,6 +289,10 @@ const Home: React.FC = () => {
         >
           <FaPlus />
         </Button>
+      </div>
+      <div className="">
+        {/* Activity Log component with prop passed */}
+        <ActivityLog activityLog={activityLog}/>
       </div>
     </>
   );
