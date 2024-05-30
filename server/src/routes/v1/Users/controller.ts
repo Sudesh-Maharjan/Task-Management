@@ -1,10 +1,12 @@
 import {Request, Response} from 'express';
 import User from './model';
-import Task from '../Tasks/model';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { sendOtpEmail } from './service';
 import { access } from 'fs';
+interface AuthenticatedRequest extends Request {
+  user?: { id: string };
+}
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
@@ -50,10 +52,6 @@ export const sendOtp = async (req: Request, res: Response) => {
      res.status(500).send('Server error');
    }
  };
-
-
-
-
 export const register = async (req: Request, res: Response) => {
    const { email, password, otp, firstName, lastName} = req.body;
 
@@ -176,6 +174,44 @@ export const getUserById = async (req: Request, res: Response) => {
     res.status(200).json(user);
   } catch (error) {
     console.error("Error fetching user:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+export const getColorPreferences = async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user?.id; // Assuming user ID is available in the request
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    const { pendingColor, inProgressColor, completedColor } = user;
+    res.status(200).json({ pendingColor, inProgressColor, completedColor });
+  } catch (error) {
+    console.error("Error fetching color preferences:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+export const saveColorPreferences = async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user?.id;
+  const { pendingColor, inProgressColor, completedColor } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    user.pendingColor = pendingColor;
+    user.inProgressColor = inProgressColor;
+    user.completedColor = completedColor;
+
+    await user.save();
+    res.status(200).send('Color preferences saved');
+  } catch (error) {
+    console.error("Error saving color preferences:", error);
     res.status(500).send("Internal Server Error");
   }
 };

@@ -10,10 +10,13 @@ import Tabs from "@/components/Tabs";
 import TaskList from "@/components/TaskList";
 import { Button } from "@/components/ui/button";
 import { FaPlus } from "react-icons/fa";
-import {Task} from '../../src/types';
-
+import { Task } from "../../src/types";
+import { toast, Toaster } from "sonner";
+// import { MdDone } from "react-icons/md";
+import SaveButton from "@/components/SaveButton";
 
 const Home: React.FC = () => {
+  const [loading, setLoading] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -21,6 +24,9 @@ const Home: React.FC = () => {
   const accessToken = localStorage.getItem("accessToken");
   const [selectedTab, setSelectedTab] = useState("Kanban");
 
+  const [pendingColor, setPendingColor] = useState("#C084FC");
+  const [inProgressColor, setInProgressColor] = useState("#C084FC");
+  const [completedColor, setCompletedColor] = useState("#C084FC");
   const fetchTasks = () => {
     axios
       .get<Task[]>(`${API_BASE_URL}/tasks`, {
@@ -32,13 +38,46 @@ const Home: React.FC = () => {
         setTasks(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching tasks:", error);
+        toast.error("Error fetching tasks:", error);
         if (error.response) {
-          console.error("Response data:", error.response.data);
+          toast.error("Response data:", error.response.data);
         }
       });
   };
+  const fetchColors = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/users/user/settings`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const { pendingColor, inProgressColor, completedColor } = response.data;
+      setPendingColor(pendingColor);
+      setInProgressColor(inProgressColor);
+      setCompletedColor(completedColor);
+    } catch (error) {
+      toast.error("Error fetching color");
+    }
+  };
 
+  //Save colors
+  const saveColors = async () => {
+    setLoading(true);
+    try {
+      const newColors = { pendingColor, inProgressColor, completedColor };
+      await axios.post(`${API_BASE_URL}/users/user/settings`, newColors, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      toast.success("Colors saved successfully!");
+    } catch (error) {
+      toast.error("Error saving colorsQ");
+      
+    }finally{
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     if (!accessToken) {
       console.error("Access token not found in cookies");
@@ -46,6 +85,7 @@ const Home: React.FC = () => {
       return;
     }
     fetchTasks();
+    fetchColors();
   }, []);
 
   const handleTaskSubmit = (task: Task) => {
@@ -68,10 +108,7 @@ const Home: React.FC = () => {
         setSelectedTask(null);
       })
       .catch((error) => {
-        console.error(
-          `Error ${task._id ? "updating" : "creating"} task:`,
-          error
-        );
+        toast.error(`Error ${task._id ? "updating" : "creating"} task:`, error);
       });
   };
 
@@ -91,7 +128,7 @@ const Home: React.FC = () => {
         fetchTasks();
       })
       .catch((error) => {
-        console.error("Error deleting task:", error);
+        toast.error("Error deleting task:", error);
       });
   };
 
@@ -102,12 +139,13 @@ const Home: React.FC = () => {
   const handleTaskUpdate = (updatedTasks: Task[]) => {
     setTasks(updatedTasks);
   };
-  
+
   const moveTask = (taskId: string, status: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task._id === taskId ? { ...task, status: status } : task
-      ) as Task[]
+    setTasks(
+      (prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === taskId ? { ...task, status: status } : task
+        ) as Task[]
     );
     axios
       .put(
@@ -120,59 +158,91 @@ const Home: React.FC = () => {
         }
       )
       .catch((error) => {
-        console.error("Error updating task status:", error);
+        toast.error("Error updating task status:", error);
       });
   };
 
   return (
     <>
       <Navigation />
+      <Toaster />
       <Tabs onSelectTab={setSelectedTab} />
       {selectedTab === "Kanban" && (
+        
         <div>
-          <h1 className="text-3xl text-center my-3 font-bold">Kanban View</h1>
-          <div className="my-4 grid grid-cols-3 gap-2">
+           <div className="flex flex-col items-end">
+            <div className="flex justify-center">
+            <div className="block text-sm font-medium text-gray-700">
+              <input
+                type="color"
+                value={pendingColor}
+                onChange={(e) => setPendingColor(e.target.value)}
+                className="mt-1 hover:cursor-pointer"
+              />
+            </div>
+            <div className="block text-sm font-medium text-gray-700">
+              <input
+                type="color"
+                value={inProgressColor}
+                onChange={(e) => setInProgressColor(e.target.value)}
+                className="mt-1 hover:cursor-pointer"
+              />
+            </div>
+            <div className="block text-sm font-medium text-gray-700">
+              <input
+                type="color"
+                value={completedColor}
+                onChange={(e) => setCompletedColor(e.target.value)}
+                className="mt-1 hover:cursor-pointer"
+              />
+            </div>
+            </div>
+            <SaveButton saveColors={saveColors} loading={loading} />
+          </div>
+          <h1 className="text-3xl text-center font-bold">Kanban View</h1>
+          <div className=" b-1 grid grid-cols-3 gap-2">
             <TaskList
               tasks={tasks.filter((task) => task.status === "pending")}
               status="pending"
               moveTask={moveTask}
               onViewTask={handleViewTask}
-              onEditTask={handleEditTask} 
+              onEditTask={handleEditTask}
               onDeleteTask={handleDeleteTask}
+              color={pendingColor}
             />
             <TaskList
               tasks={tasks.filter((task) => task.status === "in-progress")}
               status="in-progress"
               moveTask={moveTask}
-              onViewTask={handleViewTask} 
-              onEditTask={handleEditTask} 
+              onViewTask={handleViewTask}
+              onEditTask={handleEditTask}
               onDeleteTask={handleDeleteTask}
-
+              color={inProgressColor}
             />
             <TaskList
               tasks={tasks.filter((task) => task.status === "completed")}
               status="completed"
               moveTask={moveTask}
-              onViewTask={handleViewTask} 
-              onEditTask={handleEditTask} 
+              onViewTask={handleViewTask}
+              onEditTask={handleEditTask}
               onDeleteTask={handleDeleteTask}
-
+              color={completedColor}
             />
           </div>
+         
         </div>
       )}
       {selectedTab === "List" && (
-
-      <ListView
-        tasks={tasks}
-        onEditTask={handleEditTask}
-        onTaskDelete={handleDeleteTask}
-        onDeleteTask={handleDeleteTask}
-        onViewTask={handleViewTask}
-        onTaskUpdate={handleTaskUpdate}
-      />
+        <ListView
+          tasks={tasks}
+          onEditTask={handleEditTask}
+          onTaskDelete={handleDeleteTask}
+          onDeleteTask={handleDeleteTask}
+          onViewTask={handleViewTask}
+          onTaskUpdate={handleTaskUpdate}
+        />
       )}
-       {showSidebar && (
+      {showSidebar && (
         <RightSidebar
           selectedTask={selectedTask}
           onClose={() => {
@@ -193,15 +263,17 @@ const Home: React.FC = () => {
         />
       )}
       <div className="fixed bottom-4 right-4">
-          <Button
-            variant={"purple"}
-            className="text-white px-4 py-2 rounded-md transform hover:rotate-180 rounded-ss-2xl transition duration-1000"
-            onClick={() => {setShowSidebar(true); setSelectedTask(null)}}
-          >
-           <FaPlus />
-          </Button>
-        </div>
-
+        <Button
+          variant={"purple"}
+          className="text-white px-4 py-2 rounded-md transform hover:rotate-180 rounded-ss-2xl transition duration-1000"
+          onClick={() => {
+            setShowSidebar(true);
+            setSelectedTask(null);
+          }}
+        >
+          <FaPlus />
+        </Button>
+      </div>
     </>
   );
 };

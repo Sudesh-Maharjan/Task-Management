@@ -9,6 +9,9 @@ interface User {
   isVerified: boolean;
   otp?: string;
   otpExpires?: Date;
+  pendingColor?: string;     
+  inProgressColor?: string;   
+  completedColor?: string;  
 }
 
 const userSchema: Schema = new Schema({
@@ -38,6 +41,15 @@ const userSchema: Schema = new Schema({
   isVerified: {
     type: Boolean,
     default: false,
+  },
+  pendingColor: {
+    type: String,
+  },
+  inProgressColor: {
+    type: String,
+  },
+  completedColor: {
+    type: String,
   },
 });
 

@@ -4,13 +4,15 @@ import TaskItem from "./TaskIItem";
 import {Task} from '../../src/types';
 
 const TaskList:React.FC<{
+  //props
   tasks: Task[];
   status: string;
   moveTask: (taskId: string, status: string) => void;
   onViewTask: (task: Task) => void;
   onEditTask: (task: Task) => void;
   onDeleteTask: (id: string) => void;
-}> = ({ tasks, status, moveTask, onEditTask, onDeleteTask, onViewTask}) => {
+  color: string;
+}> = ({ tasks, status, moveTask, onEditTask, onDeleteTask, onViewTask, color}) => {
   const [{ isOver }, drop] = useDrop({
     accept: "TASK",
     drop: (item) => moveTask(item._id, status),
@@ -26,12 +28,13 @@ const TaskList:React.FC<{
         isOver ? "bg-gray-300" : "bg-gray-200"
       }`}
       
-    >
+      >
       {/* workflow stage title */}
-      <h2 className="text-md font-semibold mb-4 flex justify-center bg-purple-400 rounded-t-md text-white">
+      <h2 className="relative text-md font-semibold py-2 flex justify-center rounded-t-md text-white" style={{background: color}}>
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </h2>
-      <div className="flex flex-col items-center" style={{ maxHeight: "400px", overflowY: "auto" }}>
+      {/* workflow stage */}
+      <div className="flex flex-col items-center" style={{ maxHeight: "400px", overflowY: "auto", background:color}}>
       {tasks.map((task) => (
           <TaskItem
             key={task.id}
