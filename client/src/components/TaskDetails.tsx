@@ -52,9 +52,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, assignedUser, o
           </Button>
         </div>
         <div className=" mb-4">
-        <h3 className="text-lg font-semibold">Priority</h3>
+        <h3 className="text-lg font-semibold capitalize">Status</h3>
 
-            <span>{task.status}</span>
+            <span className="capitalize">{task.status}</span>
           </div>
       </div>
     </div>

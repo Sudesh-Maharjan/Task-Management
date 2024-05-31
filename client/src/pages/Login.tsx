@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 import { toast, Toaster } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '@/Auth/AxiosInstance';
+import Cookies from 'js-cookie'
+// import axiosInstance from '@/Auth/AxiosInstance';
 import {
   Form,
   FormField,
 } from "@/components/ui/form";
+import API_BASE_URL from '../../config';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -22,7 +24,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [showLoginSuccess, setShowLoginSuccess] = useState(false);
-  console.log(showLoginSuccess);
+  // console.log(showLoginSuccess);
   const form = useForm<LoginFormData>({
    
     resolver: zodResolver(loginSchema),
@@ -31,21 +33,29 @@ const Login = () => {
 
   const handleLogin: SubmitHandler<LoginFormData> = async (data) => {
     try {
-      const response = await axiosInstance.post('users/login', data);
-      const { accessToken, refreshToken } = response.data;
-  // document.cookie = `accessToken=${accessToken};`;
+      const response = await axios.post(`${API_BASE_URL}/users/login` , {
+        email: data.email,
+        password: data.password,
+      });
+      // document.cookie = `accessToken=${accessToken};`;
+      if(response.data){
+    const { accessToken, refreshToken } = response.data;
   localStorage.setItem('accessToken', accessToken);
+  Cookies.set('accessToken', accessToken, {expires: 1});
   localStorage.setItem('refreshToken', refreshToken);
+
   localStorage.setItem('User_data', JSON.stringify(response.data.user));
 
-      console.log('Login successful:', response.data);
+      console.log('Login successful:', response.data.accessToken);
       toast.success('Login successful!');
       setShowLoginSuccess(true);
       setTimeout(() => {
         setShowLoginSuccess(false);
         navigate('/home');
       }, 1000);
-
+    }else{
+      toast.error('Login failed! Please check your credentials.');
+    }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data || 'Login failed! Please check your credentials.');
