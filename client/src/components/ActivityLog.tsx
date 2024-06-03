@@ -2,12 +2,16 @@ import axios from 'axios';
 import API_BASE_URL from '../../config';
 import React, { useEffect, useState } from 'react'
 import {ActivityLogEntry}  from '@/types';
-
+const accessToken = localStorage.getItem('accessToken');
 const ActivityLog: React.FC = () => {
     const [activityLog, setActivityLog] = useState<string[]>([]);
 
     useEffect(() => {
-      axios.get(`${API_BASE_URL}/activity`)
+      axios.get(`${API_BASE_URL}/activity`,{
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
         .then((response) => {
           setActivityLog(response.data.map((log: ActivityLogEntry) => `${new Date(log.timestamp).toLocaleString()}: ${log.action}`));
         })

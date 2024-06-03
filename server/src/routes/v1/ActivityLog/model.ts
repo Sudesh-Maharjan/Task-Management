@@ -3,6 +3,7 @@ import mongoose, { Schema } from "mongoose";
 export interface ActivityLog {
   action: string;
   timestamp: Date;
+  userID: string;
 }
 
 const ActivityLogSchema: Schema<ActivityLog> = new Schema({
@@ -13,6 +14,10 @@ const ActivityLogSchema: Schema<ActivityLog> = new Schema({
   timestamp: {
     type: Date,
     default: Date.now,
+  },
+  userID: {
+    type: String,
+    required: true,
   },
 });
 

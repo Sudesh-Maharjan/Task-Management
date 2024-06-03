@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Task, { Task as TaskType } from "./model";
 import { StatusCodes } from "http-status-codes";
 import User from '../Users/model';
+import { checkTaskOwnership } from "../../../Middleware/Authorization";
 let tasks: TaskType[] = [];
 let currentId = 1;
 
@@ -36,24 +37,22 @@ export const createTask = async (req: Request, res: Response) => {
 
 export const getTasks = async (req: Request, res: Response) => {
   const { tags, search } = req.query;
+  const userId = (req as any).user?.id;
   
   try {
-    let query = {};
+    let query: any = { assigneeID: userId };
 
     if (tags) {
       const tagsArray = (tags as string).split(',').map(tag => tag.trim());
-      query = { ...query, tags: { $all: tagsArray.map(tag => new RegExp(tag, 'i')) } };
+      query.tags = { $all: tagsArray.map(tag => new RegExp(tag, 'i')) };
     }
 
     if (search) {
       const searchRegex = new RegExp(search as string, 'i');
-      query = { 
-        ...query, 
-        $or: [
-          { title: { $regex: searchRegex } },
-          { description: { $regex: searchRegex } }
-        ] 
-      };
+      query.$or = [
+        { title: { $regex: searchRegex } },
+        { description: { $regex: searchRegex } }
+      ];
     }
     let tasks = await Task.find(query);
 
@@ -73,12 +72,11 @@ export const getTasks = async (req: Request, res: Response) => {
 export const getTask = async (req: Request, res: Response) => {
   const taskId = req.params.id;
   try {
-    if (!taskId) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Task ID is required" });
-    }
+    await checkTaskOwnership(req, res, async () => {
     const task = await Task.findById(taskId);
     if (!task) return res.status(404).send("Task not found");
     res.json(task);
+    });
   } catch (error) {
     console.error("Error fetching task:", error);
     res.status(500).send("Internal Server Error");
@@ -90,11 +88,13 @@ export const updateTask = async (req: Request, res: Response) => {
   const updates = req.body;
 
   try {
+    await checkTaskOwnership(req, res, async () => {
     const task = await Task.findByIdAndUpdate(id, updates, { new: true });
     if (!task) {
       return res.status(StatusCodes.NOT_FOUND).json({ message: "Task not found" });
     }
     res.json(task);
+  });
   } catch (error: any) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
   }
@@ -103,9 +103,11 @@ export const updateTask = async (req: Request, res: Response) => {
 export const deleteTask = async (req: Request, res: Response) => {
   const taskId = req.params.id;
   try {
+    await checkTaskOwnership(req, res, async () => {
     const deletedTask = await Task.findByIdAndDelete(taskId);
     if (!deletedTask) return res.status(404).send("Task not found");
     res.json({ message: "Task deleted successfully." });
+    });
   } catch (error) {
     console.error("Error deleting task:", error);
     res.status(500).send("Internal Server Error");

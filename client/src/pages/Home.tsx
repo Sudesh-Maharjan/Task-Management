@@ -177,7 +177,7 @@ const logActivity = (action: string) => {
   const timestamp = moment().format('Do MMMM, dddd, YYYY'); // Format timestamp (Moment js)
   const timeAgo = moment().startOf('minute').fromNow(); // Calculate time ago 
   const logEntry = `${timestamp} ${timeAgo}: ${action}`
-  setActivityLog((prevLog) =>  [`${timestamp} ${timeAgo}: ${action}`, ...prevLog]); //prevLog -> takes the previous activity log and return a new array
+  setActivityLog((prevLog) => [`${logEntry}`, ...prevLog]); //prevLog -> takes the previous activity log and return a new array
 
   axios.post(`${API_BASE_URL}/activity`, { action: logEntry}, {
 headers: {
