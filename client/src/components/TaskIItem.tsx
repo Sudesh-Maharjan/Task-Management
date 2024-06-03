@@ -53,7 +53,7 @@ const TaskItem: React.FC<{
         setAssigneeName("Unassigned");
       }
     } catch (error) {
-      toast.error("Error fetching assignee details:");
+      console.error("Error fetching assignee details:");
     }
   };
   const formatDueDate = (dueDate: string) => {

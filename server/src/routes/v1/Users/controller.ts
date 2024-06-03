@@ -103,28 +103,6 @@ res.status(201).send('Registration Success full!');
    }
 };
 
-
-// export const verifyOtp = async (req: Request, res: Response) => {
-//    const {email, otp} = req.body;
-
-//    try{
-//       const user = await User.findOne({email});
-//       if(!user) return res.status(400).send('User not found');
-// //checking the user entered otp
-//       if(!user.otp || !user.otpExpires || user.otp !== otp || user.otpExpires < new Date()){
-//          return res.status(400).send('Invalid or expired OTP');
-//       }
-
-//       user.isVerified = true;
-//       user.otp = undefined;
-//       user.otpExpires = undefined;
-//       await user.save();
-//       res.status(200).send('User verified');
-//    }catch{
-// res.status(500).send('Server error');
-//    }
-// }
-
 export const login = async (req: Request, res: Response) => {
    const {email, password} = req.body;
 
@@ -162,22 +140,6 @@ export const getAllUsers = async (req: Request, res: Response) => {
     res.status(500).send("Internal Server Error");
   }
 };
-//Get user by id
-// export const getUser = async (req: Request, res: Response) => {
-//   const userId = req.params._id;
-
-//   try {
-//     const user = await User.findById(userId);
-//     if (!user) {
-//       return res.status(404).send('User not found');
-//     }
-//     res.status(200).json(user);
-//   } catch (error) {
-//     console.error("Error fetching user:", error);
-//     res.status(500).send("Internal Server Error");
-//   }
-// };
-
 //Assigned users
 export const getUserById = async (req: Request, res: Response) => {
   const userId = req.params.assigneeID;
@@ -232,3 +194,18 @@ export const saveColorPreferences = async (req: AuthenticatedRequest, res: Respo
   }
 };
 
+//Profile details
+export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user?.id;
+
+  try {
+    const user = await User.findById(userId).select('-password -otp -otpExpires');
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};

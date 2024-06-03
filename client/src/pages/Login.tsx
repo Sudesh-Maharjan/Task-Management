@@ -24,7 +24,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [showLoginSuccess, setShowLoginSuccess] = useState(false);
-  // console.log(showLoginSuccess);
+  console.log(showLoginSuccess);
   const form = useForm<LoginFormData>({
    
     resolver: zodResolver(loginSchema),
@@ -64,7 +64,15 @@ const Login = () => {
       }
     }
   };
-
+  useEffect(() => {
+    //check authentication cookie exist garxaki nai
+    const authToken =  localStorage.getItem('accessToken');
+    
+    //if yes then navigate to admin.
+    if(authToken) {
+      navigate('/home');
+    }
+  }, [navigate]);
 
   return (
     <div className="relative flex justify-center items-center min-h-screen bg-purple-300">

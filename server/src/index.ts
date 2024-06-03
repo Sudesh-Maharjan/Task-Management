@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import userRoutes from './routes/v1/Users/index';
 import taskRoutes from './routes/v1/Tasks/index';
+// import commentRoutes from './routes/v1/Comment/index';
+import activityRoutes from './routes/v1/ActivityLog/index';
 import cors from 'cors';
 dotenv.config();
 
@@ -19,6 +21,7 @@ app.use(express.json());
 
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/tasks', taskRoutes);
+app.use('/api/v1/activity', activityRoutes);
 
 
 mongoose.connect(`mongodb+srv://sudesh:admin123@taskmanagement.amqqiom.mongodb.net/taskmanagement?retryWrites=true&w=majority&appName=Taskmanagement`)

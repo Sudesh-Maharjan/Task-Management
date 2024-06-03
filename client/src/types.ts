@@ -1,3 +1,4 @@
+import ActivityLog from './components/ActivityLog';
 //Task model
 export interface Task {
    id: number;
@@ -33,4 +34,8 @@ export interface Task {
   isVerified: boolean;
   otp?: string;
   otpExpires?: Date;
+}
+export interface ActivityLogEntry{
+  timestamp: string;
+  action: string;
 }

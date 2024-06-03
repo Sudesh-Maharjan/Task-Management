@@ -1,7 +1,5 @@
-// declare namespace NodeJS {
-//    interface ProcessEnv {
-//        PORT: string;
-//        MONGO_URL: string;
-//        // Add other environment variables here if needed
-//    }
-// }
+import { Request } from "express";
+
+export interface AuthenticatedRequest extends Request {
+  user?: { id: string };
+}

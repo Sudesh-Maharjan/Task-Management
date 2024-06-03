@@ -22,6 +22,7 @@ export const createTask = async (req: Request, res: Response) => {
     assigneeID,
     tags: tags || [],
     status: taskStatus,
+    comments: [],
   };
 
   try {
@@ -72,6 +73,9 @@ export const getTasks = async (req: Request, res: Response) => {
 export const getTask = async (req: Request, res: Response) => {
   const taskId = req.params.id;
   try {
+    if (!taskId) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Task ID is required" });
+    }
     const task = await Task.findById(taskId);
     if (!task) return res.status(404).send("Task not found");
     res.json(task);
@@ -107,3 +111,6 @@ export const deleteTask = async (req: Request, res: Response) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+
+

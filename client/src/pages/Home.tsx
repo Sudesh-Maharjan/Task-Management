@@ -136,6 +136,7 @@ const Home: React.FC = () => {
       .then(() => {
         fetchTasks();
         logActivity("Task deleted");
+        toast.success("Task deleted successfully!");
       })
       .catch((error) => {
         toast.error("Error deleting task:", error);
@@ -175,8 +176,19 @@ const Home: React.FC = () => {
 const logActivity = (action: string) => {
   const timestamp = moment().format('Do MMMM, dddd, YYYY'); // Format timestamp (Moment js)
   const timeAgo = moment().startOf('minute').fromNow(); // Calculate time ago 
+  const logEntry = `${timestamp} ${timeAgo}: ${action}`
   setActivityLog((prevLog) =>  [`${timestamp} ${timeAgo}: ${action}`, ...prevLog]); //prevLog -> takes the previous activity log and return a new array
+
+  axios.post(`${API_BASE_URL}/activity`, { action: logEntry}, {
+headers: {
+  Authorization: `Bearer ${accessToken}`,
+},
+}).catch((error) =>{
+  toast.error("Error logging activity:", error);
+
+});
 };
+
   return (
     <>
       <Navigation />
@@ -215,7 +227,7 @@ const logActivity = (action: string) => {
             <SaveButton saveColors={saveColors} loading={loading} />
           </div>
           <h1 className="text-3xl text-center font-bold">Kanban View</h1>
-          <div className=" b-1 grid grid-cols-3 gap-2">
+          <div className=" b-1 grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
             <TaskList
               tasks={tasks.filter((task) => task.status === "pending")}
               status="pending"
