@@ -3,7 +3,7 @@ import { useDrop } from "react-dnd";
 import TaskItem from "./TaskIItem";
 import {Task} from '../../src/types';
 import { toast, Toaster } from 'sonner';
-
+import '../components/styles.css'
 const validTransitions: { [key: string]: string[] } = {
   "pending": ["in-progress"],
   "in-progress": ["completed", "pending"],
@@ -53,7 +53,7 @@ const TaskList:React.FC<{
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </h2>
       {/* workflow stage */}
-      <div className="flex flex-col items-center" style={{ maxHeight: "400px", overflowY: "auto", background:color}}>
+      <div className="flex flex-col items-center scrollable-container" style={{ maxHeight: "700px", overflowY: "auto", background:color}}>
       {tasks.map((task) => (
           <TaskItem
             key={task.id}

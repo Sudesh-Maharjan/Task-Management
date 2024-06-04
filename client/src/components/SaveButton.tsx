@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { MdDone } from "react-icons/md";
 import { Button } from "@/components/ui/button";
-
+import { IoIosSave } from "react-icons/io";
 const SaveButton: React.FC<{
   saveColors: () => void;
   loading: boolean;
@@ -17,7 +17,7 @@ const SaveButton: React.FC<{
   return (
     <Button
       variant="purple"
-      className="flex justify-center items-center gap-1 w-24"
+      className="flex justify-center items-center gap-1 w-14 mb-1"
       onClick={handleSave}
     >
      {loading ? (
@@ -42,7 +42,7 @@ const SaveButton: React.FC<{
           ></path>
         </svg>
        ) : null}
-      Save{" "}
+      <IoIosSave className="text-xl"/>{" "}
       <span className={`text-xl ${saved ? "" : "hidden"}`}>
         <MdDone />
       </span>

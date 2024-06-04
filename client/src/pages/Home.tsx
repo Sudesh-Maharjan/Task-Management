@@ -194,11 +194,14 @@ headers: {
       <Navigation />
       <Toaster />
       <Tabs onSelectTab={setSelectedTab} />
+      <div className="">
       {selectedTab === "Kanban" && (
-        
         <div>
-           <div className="flex flex-col items-end">
+          <h1 className="text-3xl text-center font-bold">Kanban View</h1>
+          <div className="flex justify-end gap-3 items-end">
+            <SaveButton saveColors={saveColors} loading={loading} />
             <div className="flex justify-center">
+
             <div className="block text-sm font-medium text-gray-700">
               <input
                 type="color"
@@ -224,9 +227,7 @@ headers: {
               />
             </div>
             </div>
-            <SaveButton saveColors={saveColors} loading={loading} />
           </div>
-          <h1 className="text-3xl text-center font-bold">Kanban View</h1>
           <div className=" b-1 grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
             <TaskList
               tasks={tasks.filter((task) => task.status === "pending")}
@@ -270,6 +271,7 @@ headers: {
           onTaskUpdate={handleTaskUpdate}
         />
       )}
+</div>
       {showSidebar && (
         <RightSidebar
           selectedTask={selectedTask}

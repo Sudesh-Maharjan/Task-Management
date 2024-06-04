@@ -176,8 +176,6 @@ const ProfileForm = () => {
 const Register = () => {
   return (
     <div className='flex justify-center items-center flex-col w-full relative min-h-screen bg-purple-300'>
-    
-      <h1>Register</h1>
       <div className="p-5">
         
       <ProfileForm />

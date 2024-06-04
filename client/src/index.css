@@ -66,7 +66,7 @@
     }
   }
 
-  @layer base {
+  /* @layer base {
     * {
       @apply border-border;
     }
@@ -111,9 +111,9 @@
   }
   
   .ball {
-    width: 200px; /* Ball size */
-    height: 200px; /* Ball size */
-    background-color: rgba(173, 127, 255, 0.7); /* Lighter purple color */
+    width: 200px; 
+    height: 200px; 
+    background-color: rgba(173, 127, 255, 0.7); 
     border-radius: 50%;
     position: absolute;
     top: 0%;
@@ -145,7 +145,7 @@
     animation-duration: 18s, 16s;
     left: 80%;
     top: 50%;
-  }
+  } */
   
   /* Cube animation */
   @keyframes cubeRotate {

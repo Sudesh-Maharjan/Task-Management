@@ -75,7 +75,8 @@ const Login = () => {
   }, [navigate]);
 
   return (
-    <div className="relative flex justify-center items-center min-h-screen bg-purple-300">
+    <>
+    <div className="relative flex flex-col justify-center items-center min-h-screen bg-purple-300">
       {/* Animated Cubes in Login page*/}
       <div className="absolute inset-0 overflow-hidden">
         <div className="cube">
@@ -104,16 +105,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Animated Bouncing Balls */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="ball"></div>
-        <div className="ball"></div>
-        <div className="ball"></div>
-        <div className="ball"></div>
-        <div className="ball"></div>
-      </div>
-
-    
       <div className="p-5 bg-white bg-opacity-80 rounded-md shadow-lg relative z-10">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-6 w-[400px]">
@@ -142,6 +133,7 @@ const Login = () => {
       <Toaster />
       </div>
     </div>
+    </>
   );
 };
 
