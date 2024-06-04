@@ -20,6 +20,7 @@ const ListView: React.FC<{
   const [selectedTasks, setSelectedTasks] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [sortByTitleAsc, setSortByTitleAsc] = useState(true);
+  const [sortByPriorityAsc, setSortByPriorityAsc] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -80,9 +81,25 @@ const ListView: React.FC<{
      }
    });
    setSortByTitleAsc(!sortByTitleAsc);
+   onTaskUpdate(sortedTasks);
    setSelectedTasks([]);
    setSelectAll(false);
  };
+ const handleSortByPriority = () => {
+  const priorityOrder = { high: 1, medium: 2, low: 3 };
+  const sortedTasks = tasks.slice().sort((a, b) => {
+    if (sortByPriorityAsc) {
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    } else {
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    }
+  });
+  setSortByPriorityAsc(!sortByPriorityAsc);
+  onTaskUpdate(sortedTasks);
+  setSelectedTasks([]);
+  setSelectAll(false);
+};
+
  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   setSearchQuery(event.target.value);
 };
@@ -93,6 +110,8 @@ const formatDueDate = (dueDate: string) => {
   const formattedDate = due.format("DD MMMM YYYY");
   return `${formattedDate} (${daysToGo} days to go)`;
 };
+
+const tagColors = ["bg-purple-300","bg-red-200", "bg-green-200", "bg-blue-200", "bg-yellow-200"];
   return (
    <>
   <h1 className="text-4xl text-center font-bold">Task List</h1>
@@ -132,14 +151,21 @@ const formatDueDate = (dueDate: string) => {
     <table className="w-full">
       <thead>
         <tr className="bg-purple-100">
-          <th className=" px-4 py-2">Title</th>
+        <th className="px-4 py-2 cursor-pointer" onClick={handleSortByTitle}>
+                Sort by Title {sortByTitleAsc ? "↓" : "↑"}
+              </th>
           <th className=" px-4 py-2">Description</th>
           <th className=" px-4 py-2">Due Date</th>
-          <th className=" px-4 py-2">Priority</th>
+          <th className="px-4 py-2 cursor-pointer" onClick={handleSortByPriority}>
+               Sort by Priority {sortByPriorityAsc ? "↓" : "↑"}
+              </th>
           <th className=" px-4 py-2">Status</th>
-          <th className=" px-4 py-2 cursor-pointer" onClick={handleSortByTitle}>
-            Sort by Title {sortByTitleAsc ? "↓" : "↑"}
-          </th>
+          <th className="px-4 py-2">
+               Tags
+              </th>
+          <th className="px-4 py-2">
+               Functions
+              </th>
         </tr>
       </thead>
       <tbody>
@@ -162,6 +188,33 @@ const formatDueDate = (dueDate: string) => {
               {task.priority}
             </td>
             <td className="border border-purple-200 px-4 py-2 capitalize">{task.status}</td>
+            <td className="border border-purple-200 px-4 py-2 relative group">
+                  <div className="flex flex-wrap flex-col items-center">
+                    {task.tags.length > 1 && (
+                      <span className="text-xs font-bold text-gray-500">{task.tags.length} tags</span>
+                    )}
+                    {task.tags.slice(0, 1).map((tag, index) => (
+                      <span
+                        key={index}
+                        className={`px-3 py-1 rounded-full text-sm capitalize ${tagColors[index % tagColors.length]}`}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  {task.tags.length > 1 && (
+                    <div className="absolute left-0 top-full mt-1 w-max p-2 bg-white border border-gray-300 rounded shadow-lg hidden group-hover:block z-10">
+                      {task.tags.map((tag, index) => (
+                        <span
+                        key={index}
+                        className={`px-3 py-1 m-1 rounded-full text-sm capitalize ${tagColors[index % tagColors.length]}`}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </td>
             <td className="border border-purple-200 px-4 py-2 flex justify-center ">
               <Button variant={"purple"}
                 className="text-white rounded-md mx-5"

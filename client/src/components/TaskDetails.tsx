@@ -11,7 +11,7 @@ interface TaskDetailModalProps {
   onClose: () => void;
   onUpdate: (task: Task) => void;
 }
-
+const tagColors = ["bg-purple-300","bg-red-200", "bg-green-200", "bg-blue-200", "bg-yellow-200"];
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, assignedUser, onClose, onUpdate }) => {
   const animation = useSpring({
     opacity: 1,
@@ -21,18 +21,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, assignedUser, o
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <animated.div style={animation} className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg relative">
-        <div className="bg-purple-500 text-white px-4 py-2 rounded-md mb-4">
-          {assignedUser ? (
-            <>
-              <span className="block text-lg font-semibold">
-                {assignedUser.firstName} {assignedUser.lastName}
-              </span>
-              <span className="text-sm">{assignedUser.email}</span>
-            </>
-          ) : (
-            <span>.</span>
-          )}
-        </div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Task Details</h2>
           <button
@@ -66,12 +54,12 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, assignedUser, o
           <h3 className="text-lg font-semibold">Tags</h3>
           <div className="flex flex-wrap gap-2 mt-2">
             {task.tags.map((tag, index) => (
-              <span
-                key={index}
-                className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm capitalize"
-              >
-                {tag}
-              </span>
+             <span
+             key={index}
+             className={`px-3 py-1 rounded-full text-sm capitalize ${tagColors[index % tagColors.length]}`}
+           >
+             {tag}
+           </span>
             ))}
           </div>
         </div>

@@ -101,7 +101,6 @@ export const updateTask = async (req: Request, res: Response) => {
     delete updates.assignerID;
     const { status, ...otherUpdates } = updates;
 
-    // Ensure status is included in the update if it's part of the request body
     const updatedTaskData = status ? { ...otherUpdates, status } : otherUpdates;
     const updatedTask = await Task.findByIdAndUpdate(id, { ...updates, status }, { new: true });
     res.json(updatedTask);
