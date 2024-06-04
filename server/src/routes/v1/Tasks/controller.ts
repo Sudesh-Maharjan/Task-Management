@@ -8,9 +8,9 @@ let currentId = 1;
 
 export const createTask = async (req: Request, res: Response) => {
   const { title, description, dueDate, priority, assigneeID, tags, status } = req.body;
-
+  const assignerID = (req as any).user?.id;
   if (!title || !description) {
-    return res.status(400).send("Title and Description is required");
+    return res.status(400).send("Title , Description are required");
   }
   const taskStatus = status || "pending";
   const task: TaskType = {
@@ -21,6 +21,7 @@ export const createTask = async (req: Request, res: Response) => {
     priority,
     createDate: new Date(),
     assigneeID,
+    assignerID, 
     tags: tags || [],
     status: taskStatus,
     comments: [],
@@ -40,8 +41,12 @@ export const getTasks = async (req: Request, res: Response) => {
   const userId = (req as any).user?.id;
   
   try {
-    let query: any = { assigneeID: userId };
-
+    let query: any = {
+      $or: [
+        { assigneeID: userId },
+        { assignerID: userId }
+      ]
+    };
     if (tags) {
       const tagsArray = (tags as string).split(',').map(tag => tag.trim());
       query.tags = { $all: tagsArray.map(tag => new RegExp(tag, 'i')) };
@@ -59,7 +64,7 @@ export const getTasks = async (req: Request, res: Response) => {
     // Sorting tasks by priority
     tasks.sort((a, b) => {
       const priorityOrder = { "high": 1, "medium": 2, "low": 3 };
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
+      return priorityOrder[a.priority] - priorityOrder[b.priority ];
     });
 
     res.json(tasks);
@@ -89,11 +94,17 @@ export const updateTask = async (req: Request, res: Response) => {
 
   try {
     await checkTaskOwnership(req, res, async () => {
-    const task = await Task.findByIdAndUpdate(id, updates, { new: true });
+    const task = await Task.findById(id);
     if (!task) {
       return res.status(StatusCodes.NOT_FOUND).json({ message: "Task not found" });
     }
-    res.json(task);
+    delete updates.assignerID;
+    const { status, ...otherUpdates } = updates;
+
+    // Ensure status is included in the update if it's part of the request body
+    const updatedTaskData = status ? { ...otherUpdates, status } : otherUpdates;
+    const updatedTask = await Task.findByIdAndUpdate(id, { ...updates, status }, { new: true });
+    res.json(updatedTask);
   });
   } catch (error: any) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
@@ -102,8 +113,16 @@ export const updateTask = async (req: Request, res: Response) => {
 
 export const deleteTask = async (req: Request, res: Response) => {
   const taskId = req.params.id;
+  const userId = (req as any).user?.id;
   try {
     await checkTaskOwnership(req, res, async () => {
+      const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "Task not found" });
+    }
+    if (task.assignerID.toString() !== userId) {
+      return res.status(StatusCodes.FORBIDDEN).json({ message: "You are not authorized to delete this task" });
+    }
     const deletedTask = await Task.findByIdAndDelete(taskId);
     if (!deletedTask) return res.status(404).send("Task not found");
     res.json({ message: "Task deleted successfully." });

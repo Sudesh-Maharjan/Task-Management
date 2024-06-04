@@ -139,7 +139,7 @@ const Home: React.FC = () => {
         toast.success("Task deleted successfully!");
       })
       .catch((error) => {
-        toast.error("Error deleting task:", error);
+        toast.error("Not authorized to delete this task!", error);
       });
   };
 

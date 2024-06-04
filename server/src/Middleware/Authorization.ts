@@ -16,7 +16,7 @@ export const checkTaskOwnership = async (req: AuthenticatedRequest, res: Respons
       return res.status(404).json({ message: "Task not found" });
     }
 
-    if (task.assigneeID.toString() !== userId){
+    if (task.assigneeID.toString() !== userId && task.assignerID.toString() !== userId){
       return res.status(403).json({ message: "You are not authorized to access this task" });
     }
 

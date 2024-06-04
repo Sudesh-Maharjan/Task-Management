@@ -10,7 +10,7 @@ interface Task {
   description: string;
   dueDate: string;
   priority: "high" | "medium" | "low";
-  assigneeID: string;
+  assigneeID: string[];
   status: "pending" | "in-progress" | "completed";
   tags: string[];
 }
@@ -175,7 +175,7 @@ const Sidebar: React.FC<{ selectedTask: Task | null; onClose: () => void; onTask
           >
             <option value="pending">Pending</option>
             <option value="in-progress">In Progress</option>
-            <option value="completed">Completed</option>
+            <option value="completed" disabled={task.status === "pending"}>Completed</option>
           </select>
         </div>
         <div className="mb-4">

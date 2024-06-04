@@ -14,6 +14,7 @@ import {Task} from '../../src/types';
 import axios from "axios";
 import API_BASE_URL from "../../config";
 import { toast , Toaster} from "sonner";
+
 const TaskItem: React.FC<{
   task: Task;
   onEditTask: (task: Task) => void;
@@ -22,18 +23,19 @@ const TaskItem: React.FC<{
 }> = ({ task, onEditTask, onDeleteTask, onViewTask}) => {
   const [{ isDragging }, drag] = useDrag({
     type: "TASK",
-    item: { _id: task._id },
+    item: { _id: task._id, status: task.status },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
   });
 
   const [assigneeName, setAssigneeName] = useState<string>("");
-
+  const [assignerName, setAssignerName] = useState<string>("");
   useEffect(() => {
     // Fetch assignee details when component mounts
     fetchAssigneeName(task.assigneeID);
-  }, [task.assigneeID]);
+    fetchAssignerName(task.assignerID);
+  }, [task.assigneeID, task.assignerID]);
 
   const fetchAssigneeName = async (assigneeID: string) => {
     try {
@@ -56,6 +58,25 @@ const TaskItem: React.FC<{
       console.error("Error fetching assignee details:");
     }
   };
+  const fetchAssignerName = async (assignerID: string) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await axios.get(`${API_BASE_URL}/users/allusers/${assignerID}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const user = response.data;
+      if (user) {
+        const name = `${user.firstName} ${user.lastName}`;
+        setAssignerName(name);
+      } else {
+        setAssignerName("Unassigned");
+      }
+    } catch (error) {
+      console.error("Error fetching assigner details:", error);
+    }
+  };
   const formatDueDate = (dueDate: string) => {
     const due = moment(dueDate);
     const now = moment();
@@ -71,10 +92,11 @@ const TaskItem: React.FC<{
       }`}
     >
       <Toaster/>
-      <div className="absolute right-6">
+      <div className="absolute right-6 flex flex-col items-center">
       <Popover> 
   <PopoverTrigger className="text-3xl"><FaCircleUser /></PopoverTrigger>
-  <PopoverContent>{assigneeName}</PopoverContent>
+  <PopoverContent className="font-bold">Assigned to {assigneeName}
+  <div>Assigner - {assignerName}</div></PopoverContent>
 </Popover>
 
       </div>

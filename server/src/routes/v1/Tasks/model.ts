@@ -7,7 +7,8 @@ export interface Task {
   dueDate: string;
   priority: "high" | "medium" | "low";
   createDate: Date;
-  assigneeID: mongoose.Schema.Types.ObjectId;
+  assigneeID: mongoose.Types.ObjectId;
+  assignerID: mongoose.Types.ObjectId; 
   updateDate?: Date;
   tags: string[];
   status: "pending" | "in-progress" | "completed";
@@ -48,9 +49,11 @@ const TaskSchema: Schema<Task> = new Schema({
     ref: "User",
     required: true,
   },
+  assignerID: { 
+    type: Schema.Types.ObjectId,
+    required: true },
   tags: {
     type: [String],
-    required: true,
   },
   status: {
     type: String,
